@@ -1,0 +1,28 @@
+# raw MS data (large; kept on Google Drive, see config.yaml + README)
+data/raw/
+*.elib
+*.elib.peptides.txt
+diann_report*.tsv
+*.pr_matrix*.tsv
+*_CURVES_pep.tsv
+
+# figures-of-merit outputs — submitted with the manuscript as SUPPLEMENTAL TABLES,
+# not tracked here. Reproduce locally with `python build_fom.py` (needs raw data).
+# (data/maps/ IS tracked — the maps are tiny recipe inputs, not FOM outputs.)
+data/figuresofmerit/
+
+# generated figures (regenerate with `make`); commit finals by hand if desired
+output/*.png
+output/*.pdf
+output/*.svg
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# os
+.DS_Store
+desktop.ini
+Thumbs.db

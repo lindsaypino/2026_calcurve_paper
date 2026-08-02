@@ -1,0 +1,3 @@
+[submodule "tools/matrix-matched_calcurves"]
+	path = tools/matrix-matched_calcurves
+	url = https://github.com/lindsaypino/matrix-matched_calcurves.git

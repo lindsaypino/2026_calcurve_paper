@@ -1,0 +1,12 @@
+# Figure-making environment for the matrix-matched calibration curves paper.
+# The LOD/LOQ/ULOQ tool itself lives in tools/matrix-matched_calcurves (submodule)
+# and has its own requirements; these are what the figure scripts need on top.
+pandas>=2.0
+numpy>=1.24
+matplotlib>=3.6
+seaborn>=0.13
+vizta            # Talus Bio matplotlib theme + talusbio palette
+lmfit>=1.3       # only needed for the example-curve figures that refit peptides
+pyteomics>=4.7   # Fig 3: peptide m/z from sequence
+scikit-learn>=1.4  # Fig 3 LOQ-prediction model only
+pyyaml
