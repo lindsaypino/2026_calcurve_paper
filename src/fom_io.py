@@ -1,4 +1,5 @@
 """Load figures-of-merit CSVs and config; small helpers shared by figure scripts."""
+import importlib.util
 import os
 import re
 import numpy as np
@@ -23,6 +24,25 @@ def load_config(path=None):
 
 def repo_path(*parts):
     return os.path.join(_REPO, *parts)
+
+
+def raw(key, cfg=None):
+    """Resolve a raw-data path from config (e.g. raw('exploris_elib'))."""
+    cfg = cfg or load_config()
+    return cfg["raw"][key]
+
+
+def load_tool(cfg=None):
+    """Import the pinned calculate-loq.py (submodule) as a module."""
+    cfg = cfg or load_config()
+    path = repo_path(cfg["tool"]["calculate_loq"])
+    if not os.path.exists(path):
+        raise FileNotFoundError(
+            f"tool not found at {path}; run `git submodule update --init --recursive`")
+    spec = importlib.util.spec_from_file_location("calcloq", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def load_fom(group, name, cfg=None):

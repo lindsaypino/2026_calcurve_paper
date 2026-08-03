@@ -4,6 +4,10 @@ Figure-generation code for the JASMS matrix-matched calibration curves paper. Th
 LOD/LOQ/**ULOQ** algorithm itself lives in a separate repository, pinned here as a
 submodule ([`matrix-matched_calcurves`](https://github.com/lindsaypino/matrix-matched_calcurves)).
 
+> **What's left to do:** see [`docs/TODO.md`](docs/TODO.md). All figure scripts run
+> (`python run_all.py --with-raw`); remaining work is mostly manuscript text + the
+> outstanding Bruker ULOQ dataset.
+
 ## Layout
 
 ```
