@@ -1,11 +1,13 @@
 # Note: how precisely is the LOQ determined?
 
-Working note for the methods/limitations discussion. Recorded 2026-08-11.
+Working note for the methods/limitations discussion. Recorded 2026-08-11, revised
+the same day — see [Correction](#correction-to-the-first-version-of-this-note) at
+the end. Companion to [`fit_weighting_note.md`](fit_weighting_note.md).
 
 **Not measured on the paper's datasets.** Every number below comes from
 `data/one_protein.csv`, the tool's 27-peptide sample dataset (yeast, EncyclopeDIA,
 14 curve points × 3 replicates). It characterizes the *estimator*, not our results.
-Re-run the recipe on the real datasets before quoting any figure in the manuscript.
+Re-run the recipes on the real datasets before quoting any figure in the manuscript.
 
 ## The finding
 
@@ -30,22 +32,56 @@ The LOD and the fit coefficients are stable across the same perturbations (varyi
 by 1e-5 relative or less). It is specifically the bootstrap-derived LOQ that moves,
 not the segmented fit.
 
-## Two distinct causes, which matter differently
+## The dominant cause: the bootstrap discards whole curve levels
 
-**Monte Carlo noise — curable.** `KVTAVVESPEGER` spreads 36% at 100 replicates and
-collapses to 0% by 400. Nothing is wrong with the estimator here; 100 replicates is
-simply too few to pin the CV curve. A higher `--bootreps` fixes it outright.
+`_bootstrap_once` resamples **rows**, across the peptide's whole curve:
 
-**Non-identifiability — not curable by resampling.** `GEGFMVVTATGDNTFVGR` spreads
-85% at 100 replicates and is still at 40% with 1600. Its bootstrap CV curve
-approaches the 0.2 threshold so shallowly that the crossing point genuinely is not
-determined by the data. The LOQ for this peptide ranges over nearly an order of
-magnitude (0.029 to 0.247) depending only on which resamples were drawn. More
-replicates buy nothing, because the limit being estimated is not sharp.
+```python
+resampled_df = df.sample(n=len(df), replace=True, random_state=rng)
+```
 
-The distinction is worth making explicitly: the first is a tuning parameter, the
-second is a property of the peptide's curve. Both currently report a bare number
-with no indication of which situation you are in.
+This is case resampling, and nothing in it ties the draw to the curve's design. Each
+row has a ~37% chance of going undrawn, and a concentration level survives only if at
+least one of its three replicates is drawn. Measured over 5000 draws on the real 14×3
+curve:
+
+| | |
+|---|---|
+| replicates missing **at least one level entirely** | **50.2%** |
+| mean levels missing per replicate | 0.63 |
+| missing exactly two levels | 10.4% |
+| the 0-concentration blank absent entirely | 5.1% |
+
+So half of all bootstrap replicates fit a calibration curve with at least one
+concentration simply not present. There is a second-order effect too:
+`_initialize_params_auto` defines the noise region as the two lowest levels *present
+in the resample*, so in 8.9% of replicates it treats genuine signal points as noise
+and drags that replicate's noise plateau upward.
+
+**Stratified resampling — drawing within each concentration level, preserving the
+design — removes most of this.** Five seed families each, `--bootreps 100`:
+
+| peptide | case resampling (current) | stratified |
+|---|---|---|
+| GEGFMVVTATGDNTFVGR | 250.8% | **0.0%** |
+| LMNGKPMK | 60.9% | 42.5% |
+| KVTAVVESPEGER | 37.1% | 37.1% |
+| TLANTAVVIR | 0.0% | 0.0% |
+
+The argument for stratified resampling is not just that it is more stable. The
+concentration levels are a *designed* factor — chosen and pipetted, not sampled.
+Case resampling treats x as random and lets the design dissolve; stratified
+resampling respects it and estimates variation in the response at each fixed level,
+which is what a calibration curve's CV is meant to describe.
+
+## The residual: Monte Carlo noise
+
+`KVTAVVESPEGER` is unchanged by stratification (37.1% either way) but collapses to
+0% by 400 replicates. Nothing is wrong with the estimator there; 100 replicates is
+simply too few to pin the CV curve, and a higher `--bootreps` fixes it outright.
+
+`LMNGKPMK` is only partly helped (60.9% → 42.5%), so stratification is not a
+complete answer for every peptide.
 
 ## Prevalence
 
@@ -68,29 +104,51 @@ different answers for the same data — while leaving the underlying estimator
 variance untouched. That is why this note exists: the instability is now invisible
 in normal use.
 
-**Submodule pin.** `tools/matrix-matched_calcurves` is currently at `ac0b951`, which
-predates both of today's tool commits (`3d18164`, issue #15 DIA-NN densification;
-`ffa5118`, issue #16 input normalization). The measurements above were taken against
-`ffa5118`. Bump the pin before reproducing.
+**Stratified resampling is not implemented.** As of this revision the tool still
+uses case resampling; the comparison above was run with a patched copy. Adopting it
+would change LOQ values, so it is a decision to make *before* regenerating the
+paper's figures of merit, not after.
 
-We decided not to change the tool's output — reporting an interval or a
+**Submodule pin.** `tools/matrix-matched_calcurves` is currently at `ac0b951`, which
+predates today's tool commits (`3d18164`, issue #15 DIA-NN densification; `ffa5118`,
+issue #16 input normalization; `ffb1087`, piecewise + multiplier fixes). The
+measurements above were taken against `ffa5118`. Bump the pin before reproducing.
+
+We decided not to change the tool's *output* — reporting an interval or a
 "poorly determined" flag would need a defensible definition and would widen the
 output schema mid-project. Recording it here instead.
 
+## Correction to the first version of this note
+
+The first version attributed `GEGFMVVTATGDNTFVGR`'s spread to **non-identifiability**
+— a CV curve approaching the 0.2 threshold too shallowly for the crossing to be
+determined by the data, and therefore not fixable by resampling. That was wrong. The
+evidence for it was that raising `--bootreps` to 1600 left the spread at ~40%, which
+is true but does not imply what I took it to imply: more replicates of a *biased*
+resampling scheme do not remove the bias. Stratified resampling takes the same
+peptide to 0.0% spread.
+
+The corrected reading is that the dominant cause is a flaw in the resampling scheme,
+not a property of that peptide's curve. Do not describe any peptide here as
+intrinsically non-identifiable on the strength of this note.
+
 ## Reproducing
 
-Against a checkout of the tool at `ffa5118` or later, from its repo root:
+Against a checkout of the tool at `ffa5118` or later, from its repo root. This
+compares the two resampling schemes; drop the `stratified` branch to reproduce the
+seed-family table alone.
 
 ```python
 import importlib, sys
 import numpy as np
+import pandas as pd
 sys.path.insert(0, "bin")
 calc = importlib.import_module("calculate-loq")
 
 df = calc.read_input("data/one_protein.csv", "data/filename2samplegroup_map.csv")
-sub = df[df["peptide"] == "GEGFMVVTATGDNTFVGR"].sort_values(calc.SORT_KEYS, kind="mergesort")
-x = np.asarray(sub["curvepoint"], float)
-y = np.asarray(sub["area"], float)
+sub = (df[df["peptide"] == "GEGFMVVTATGDNTFVGR"]
+       .sort_values(calc.SORT_KEYS, kind="mergesort"))
+x, y = np.asarray(sub["curvepoint"], float), np.asarray(sub["area"], float)
 
 res, _ = calc.fit_by_lmfit_yang(x, y, "auto")
 a, b = res.params["a"].value, res.params["b"].value
@@ -98,13 +156,34 @@ mp = np.asarray([0.0, res.params["c"].value, a, b])
 lod, _ = calc.calculate_lod(mp, sub, 2.0, 2, 1, x, "auto")
 grid = np.linspace(lod, max(x), 100)
 model = "trilinear" if np.isfinite(res.params["c_high"].value) else "bilinear"
+groups = [g for _, g in sub.groupby("curvepoint", sort=True)]
 
-for family in range(8):                     # shift the replicate seeds
-    mat = np.vstack([calc._bootstrap_once(sub, grid, family * 10_000 + i, model)
-                     for i in range(100)])
-    cv = mat.std(axis=0, ddof=1) / mat.mean(axis=0)
-    good = (grid > lod) & (cv < 0.2)
-    print(grid[good].min() if good.any() else np.inf)
+def cv_curve(family, stratified, reps=100):
+    rows = []
+    for i in range(reps):
+        rng = np.random.default_rng(np.random.SeedSequence(family * 10_000 + i))
+        while True:
+            r = (pd.concat([g.sample(n=len(g), replace=True, random_state=rng)
+                            for g in groups]) if stratified
+                 else sub.sample(n=len(sub), replace=True, random_state=rng))
+            if r["area"].nunique() > 1:
+                break
+        rf, _ = calc.fit_by_lmfit_yang(np.asarray(r["curvepoint"], float),
+                                       np.asarray(r["area"], float), model)
+        p = rf.params
+        rows.append(np.minimum(np.maximum(grid * p["a"].value + p["b"].value,
+                                          p["c"].value), p["c_high"].value))
+    mat = np.vstack(rows)
+    return mat.std(axis=0, ddof=1) / mat.mean(axis=0)
+
+for stratified in (False, True):
+    loqs = []
+    for family in range(5):
+        cv = cv_curve(family, stratified)
+        good = (grid > lod) & (cv < 0.2)
+        loqs.append(grid[good].min() if good.any() else np.inf)
+    print("stratified" if stratified else "case", loqs)
 ```
 
-Vary the `100` to reproduce the convergence check.
+To count how often a replicate loses a level, resample and compare
+`set(r["curvepoint"].unique())` against the full set of levels.
