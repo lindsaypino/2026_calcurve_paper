@@ -4,6 +4,13 @@ Figure-generation code for the JASMS matrix-matched calibration curves paper. Th
 LOD/LOQ/**ULOQ** algorithm itself lives in a separate repository, pinned here as a
 submodule ([`matrix-matched_calcurves`](https://github.com/lindsaypino/matrix-matched_calcurves)).
 
+**Tool version.** The submodule is pinned at **`ffb1087`** ("Restore piecewise's
+legacy LOD edge cases; keep peptides with no multiplier", 2026-08-11). Not every
+figure of merit in `data/figuresofmerit/` has been regenerated against that pin yet —
+[`docs/fom_provenance.md`](docs/fom_provenance.md) records, per CSV, the exact input,
+concentration map, `min_noise_points`, and producing commit, and marks the ones that
+are still stale.
+
 > **What's left to do:** see [`docs/TODO.md`](docs/TODO.md). All figure scripts run
 > (`python run_all.py --with-raw`); remaining work is mostly manuscript text + the
 > outstanding Bruker ULOQ dataset.

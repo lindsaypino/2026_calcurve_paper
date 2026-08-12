@@ -5,13 +5,19 @@ FOM-only panels reproduce pixel-identically, the three raw-data figures reproduc
 the same content (see `run_all.py --with-raw`).
 
 ## Data / analysis
-- [ ] **Regenerate every FOM and figure against the current tool.** The tool changed
-      substantially after the figures were made: DIA-NN `report.tsv` inputs are now
-      densified (`3d18164`, issue #15) and every input format is normalized to a
-      dense grid + canonical row order (`ffa5118`, issue #16). Both move LOD/LOQ
-      values. Bump `tools/matrix-matched_calcurves` — pinned at `ac0b951`, two
-      commits behind — then rerun `build_fom.py` and `run_all.py`. Wait until the
-      tool is settled; regenerating against moving code is wasted work.
+- [ ] **Regenerate the remaining FOMs against the current tool.** The submodule is now
+      bumped to `ffb1087` (was `ac0b951`, three commits behind). The two EncyclopeDIA
+      datasets are done and came back **numerically identical** — `3d18164` (DIA-NN
+      densification) and `ffa5118` (canonical row order) have nothing to bite on in an
+      already-dense wide-format matrix, confirmed by a control run at the old pin. The
+      six Bruker DIA-NN FOMs are where the movement lives and are still stale; see
+      [`fom_provenance.md`](fom_provenance.md) for the per-CSV recipe and status.
+      Budget ~0.8 peptides/s per worker: the two 1.2 GB reports are ~4 h each at 6
+      threads and must run one at a time on a 16 GB box.
+- [ ] **Decide stratified vs case resampling before regenerating the Bruker FOMs.**
+      See [`loq_stability_note.md`](loq_stability_note.md) — `ffb1087` still uses
+      unstratified case resampling, and switching would invalidate everything
+      regenerated under it. Under discussion as of 2026-08-12.
 - [ ] **Separate Bruker dataset with a ULOQ** — locate it and run it through the
       tool; decide whether it earns a panel or a supplement.
 - [ ] *(optional)* Regenerate `asms/ultra` with the **new code at mnp=2** so Fig 3's

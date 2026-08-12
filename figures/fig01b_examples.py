@@ -54,7 +54,9 @@ def process(sub, min_noise_points):
             upper = x.max()
         xi = np.linspace(LOD, upper, 100)
         boot_model = "trilinear" if np.isfinite(c_high) else "bilinear"
-        bdf = cl.bootstrap_many(sub, new_x=xi, num_bootreps=200, model=boot_model)
+        # Default bootreps, matching the figures-of-merit runs: an example panel's
+        # LOQ has to be the same draw as the one tabulated for that peptide.
+        bdf = cl.bootstrap_many(sub, new_x=xi, model=boot_model)
         LOQ = cl.calculate_loq(np.append(mp, np.inf), bdf, 0.2)
     return dict(x=x, y=y, a=a, b=b, c=c, c_high=c_high, LOD=LOD, LOQ=LOQ, ULOQ=ULOQ)
 
