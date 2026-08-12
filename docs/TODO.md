@@ -5,6 +5,13 @@ FOM-only panels reproduce pixel-identically, the three raw-data figures reproduc
 the same content (see `run_all.py --with-raw`).
 
 ## Data / analysis
+- [ ] **Regenerate every FOM and figure against the current tool.** The tool changed
+      substantially after the figures were made: DIA-NN `report.tsv` inputs are now
+      densified (`3d18164`, issue #15) and every input format is normalized to a
+      dense grid + canonical row order (`ffa5118`, issue #16). Both move LOD/LOQ
+      values. Bump `tools/matrix-matched_calcurves` — pinned at `ac0b951`, two
+      commits behind — then rerun `build_fom.py` and `run_all.py`. Wait until the
+      tool is settled; regenerating against moving code is wasted work.
 - [ ] **Separate Bruker dataset with a ULOQ** — locate it and run it through the
       tool; decide whether it earns a panel or a supplement.
 - [ ] *(optional)* Regenerate `asms/ultra` with the **new code at mnp=2** so Fig 3's
