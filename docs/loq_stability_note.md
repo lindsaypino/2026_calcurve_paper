@@ -4,6 +4,15 @@ Working note for the methods/limitations discussion. Recorded 2026-08-11, revise
 the same day — see [Correction](#correction-to-the-first-version-of-this-note) at
 the end. Companion to [`fit_weighting_note.md`](fit_weighting_note.md).
 
+> **Superseded in part (2026-08-12).** This note names the resampling scheme as the
+> dominant cause of LOQ instability. Later work found that the *readout grid* matters
+> more: the CV is read on a uniform `linspace` while the design is log-spaced, so the
+> crossing often falls inside the interval the grid steps over. Correcting the spacing
+> makes case and Bayesian resampling produce identical outcomes, which means the
+> scheme differences measured here were substantially grid spacing in disguise. Read
+> [`loq_grid_and_resampling_note.md`](loq_grid_and_resampling_note.md) alongside this
+> one; the measurements below stand, the attribution does not.
+
 **Not measured on the paper's datasets.** Every number below comes from
 `data/one_protein.csv`, the tool's 27-peptide sample dataset (yeast, EncyclopeDIA,
 14 curve points × 3 replicates). It characterizes the *estimator*, not our results.
