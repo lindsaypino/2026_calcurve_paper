@@ -91,25 +91,30 @@ def crossing(cv, grid, lo=None):
     return (x2 if c2 == c1 else x1 + (CV_THRESH - c1) * (x2 - x1) / (c2 - c1)), "resolved"
 
 
+def draw_design(levels, reps, seed):
+    """One simulated experiment for a design: returns (x, y)."""
+    x = np.repeat(levels, reps)
+    mu = np.maximum(C0, A * x)
+    sd = np.sqrt(ADD ** 2 + (PROP * mu) ** 2)
+    rng = np.random.default_rng(np.random.SeedSequence(seed))
+    return x, np.maximum(mu + rng.normal(0, sd), 0.0)
+
+
 # ------------------------------------------------------------------ simulated half
 def simulate_designs():
     out = {}
     for k, (levels, reps) in DESIGNS.items():
-        x = np.repeat(levels, reps)
-        mu = np.maximum(C0, A * x)
-        sd = np.sqrt(ADD ** 2 + (PROP * mu) ** 2)
         truth = []
         for i in range(M_TRUTH):
-            rng = np.random.default_rng(np.random.SeedSequence(700_000 + i))
+            x, y = draw_design(levels, reps, 700_000 + i)
             try:
-                truth.append(fit(x, np.maximum(mu + rng.normal(0, sd), 0.0)))
+                truth.append(fit(x, y))
             except Exception:
                 pass
         true_loq, _ = crossing(cv_of(truth, GRID), GRID)
         est = []
         for e in range(N_EXP):
-            rng0 = np.random.default_rng(np.random.SeedSequence(e))
-            y = np.maximum(mu + rng0.normal(0, sd), 0.0)
+            x, y = draw_design(levels, reps, e)
             ps = []
             for i in range(B):
                 rng = np.random.default_rng(np.random.SeedSequence([e, i, 7]))
@@ -200,25 +205,62 @@ else:
                         grids=grids.to_numpy(dtype=object))
 
 # ------------------------------------------------------------------ figure
-fig = plt.figure(figsize=(16.5, 9.5))
-gs = fig.add_gridspec(2, 2, hspace=0.42, wspace=0.26)
+fig = plt.figure(figsize=(17.5, 14.5))
+gs = fig.add_gridspec(3, 4, hspace=0.52, wspace=0.30, top=0.945)
 
-ax = fig.add_subplot(gs[0, 0])
+BLANK_X = 4e-4      # the 0-concentration point, drawn at the left edge of a log axis
+Y_FLOOR = 1.0e3     # responses at or below zero are drawn here so they stay visible
+PANEL = "ABCD"
+
+for j, (k, (levels, reps)) in enumerate(DESIGNS.items()):
+    ax = fig.add_subplot(gs[0, j])
+    xd, yd = draw_design(levels, reps, 0)
+    pr = fit(xd, yd)
+    xs = np.geomspace(BLANK_X, 1.35, 400)
+    ax.plot(xs, np.maximum(C0, A * xs), "--", color=PRIMARY, lw=2, label="true curve")
+    ax.plot(xs, pred(pr, xs), "-", color=DCOLORS[j], lw=2.5, label="fitted curve")
+    ax.plot(np.where(xd > 0, xd, BLANK_X), np.maximum(yd, Y_FLOOR), "o", ms=6.5,
+            color=DCOLORS[j], alpha=0.75, markeredgecolor="white",
+            markeredgewidth=0.6, label="simulated runs")
+    t = sim[k][0]
+    if np.isfinite(t):
+        ax.axvline(t, color="0.35", lw=1.6, ls=":")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlim(BLANK_X * 0.6, 2.4)
+    ax.set_ylim(Y_FLOOR * 0.6, 5e6)
+    ax.set_xlabel("quantity")
+    ax.set_title(PANEL[j] + "  " + " ".join(k.splitlines()), fontsize=14)
+    ax.grid(True, alpha=0.3)
+    if j == 0:
+        ax.set_ylabel("response")
+        ax.legend(loc="upper left", fontsize=10.5, frameon=False)
+        ax.annotate("blank drawn at the left edge;", xy=(0.40, 0.12),
+                    xycoords="axes fraction", fontsize=9.5, color="0.45")
+        ax.annotate("zero responses at the axis floor", xy=(0.40, 0.04),
+                    xycoords="axes fraction", fontsize=9.5, color="0.45")
+    if j == 1:
+        ax.annotate("dotted line = achievable LOQ,", xy=(0.34, 0.12),
+                    xycoords="axes fraction", fontsize=10.5, color="0.3")
+        ax.annotate("with no runs near it", xy=(0.34, 0.04),
+                    xycoords="axes fraction", fontsize=10.5, color="0.3")
+
+ax = fig.add_subplot(gs[1, :2])
 for i, (k, (levels, reps)) in enumerate(DESIGNS.items()):
-    xs = np.where(levels > 0, levels, 4e-4)
+    xs = np.where(levels > 0, levels, BLANK_X)
     ax.plot(xs, [i] * len(levels), "o", ms=11, color=DCOLORS[i], alpha=0.9)
     ax.text(1.45, i, f"{reps} reps", va="center", fontsize=12, color=DCOLORS[i])
 ax.set_xscale("log")
 ax.set_yticks(range(len(DESIGNS)))
-ax.set_yticklabels([k.replace("\n", " ") for k in DESIGNS], fontsize=12)
+ax.set_yticklabels([" ".join(k.splitlines()) for k in DESIGNS], fontsize=12)
 ax.set_xlabel("quantity (leftmost point is the blank)")
 ax.set_xlim(2.5e-4, 3.2)
 ax.set_ylim(-0.6, len(DESIGNS) - 0.4)
 ax.invert_yaxis()
-ax.set_title("A  Four ways to spend the same 42 injections", loc="left", fontsize=15)
+ax.set_title("E  Four ways to spend the same 42 injections", loc="left", fontsize=15)
 ax.grid(True, alpha=0.3, axis="x")
 
-ax = fig.add_subplot(gs[0, 1])
+ax = fig.add_subplot(gs[1, 2:])
 keys = list(DESIGNS)
 vals = [sim[k][1][np.isfinite(sim[k][1])] for k in keys]
 bp = ax.boxplot(vals, patch_artist=True, showfliers=False, widths=0.6,
@@ -230,38 +272,36 @@ for patch, c in zip(bp["boxes"], DCOLORS):
 for i, k in enumerate(keys, start=1):
     t = sim[k][0]
     if np.isfinite(t):
-        ax.plot([i - 0.36, i + 0.36], [t, t], color=PRIMARY, lw=2.5, ls="--",
-                zorder=5)
+        ax.plot([i - 0.36, i + 0.36], [t, t], color=PRIMARY, lw=2.5, ls="--", zorder=5)
 ax.plot([], [], color=PRIMARY, lw=2.5, ls="--", label="achievable LOQ for that design")
 ax.set_yscale("log")
 ax.set_xticks(range(1, len(keys) + 1))
-ax.set_xticklabels([k.replace("\n", " ").replace(" (the real design)", "")
+ax.set_xticklabels([" ".join(k.splitlines()).replace(" (the real design)", "")
                     .replace(" (fewer levels)", "") for k in keys],
                    fontsize=11, rotation=12, ha="right")
 ax.set_ylabel("estimated LOQ (log)")
-ax.set_title("B  The design sets both the achievable LOQ and the spread", loc="left",
+ax.set_title("F  The design sets both the achievable LOQ and the spread", loc="left",
              fontsize=15)
 ax.legend(loc="upper left", fontsize=11.5, frameon=False)
 ax.grid(True, alpha=0.3, axis="y")
 
-ax = fig.add_subplot(gs[1, 0])
+ax = fig.add_subplot(gs[2, :2])
 piv = real.pivot_table(index="peptide", columns="design", values="LOQ", aggfunc="first")
 piv = piv.dropna()
 for _, r in piv.iterrows():
     ax.plot([0, 1], [r["full"], r["thinned"]], "-o", ms=5, lw=1.2,
             color=PAL[0] if r["thinned"] > r["full"] else PAL[1], alpha=0.8)
 worse = int((piv["thinned"] > piv["full"]).sum())
-ax.set_xlim(-0.3, 1.3)
-ax.set_xticks([0, 1])
-ax.set_xticklabels(["full 14-level\ncurve", "top half only\n(dense low end dropped)"],
-                   fontsize=12)
-ax.set_yscale("log")
-ax.set_ylabel("LOQ (log)")
 n_full = int(np.isfinite(real.loc[real["design"] == "full", "LOQ"]).sum())
 n_thin = int(np.isfinite(real.loc[real["design"] == "thinned", "LOQ"]).sum())
 lod_full = int(np.isfinite(real.loc[real["design"] == "full", "LOD"]).sum())
 lod_thin = int(np.isfinite(real.loc[real["design"] == "thinned", "LOD"]).sum())
-ax.set_title(f"C  Real peptides: thinning costs {n_full - n_thin} of {n_full} "
+ax.set_xlim(-0.3, 1.3)
+ax.set_xticks([0, 1])
+ax.set_xticklabels(["full 14-level curve", "top half only"], fontsize=12)
+ax.set_yscale("log")
+ax.set_ylabel("LOQ (log)")
+ax.set_title(f"G  Real peptides: thinning costs {n_full - n_thin} of {n_full} "
              f"their LOQ outright", loc="left", fontsize=15)
 ax.grid(True, alpha=0.3, axis="y")
 med = np.median(piv["thinned"] / piv["full"])
@@ -273,9 +313,9 @@ ax.annotate(f"of the {len(piv)} that survive, median {med:.1f}x higher",
             xy=(0.5, 0.04), xycoords="axes fraction", ha="center", fontsize=12.5,
             color="0.3")
 
-ax = fig.add_subplot(gs[1, 1])
+ax = fig.add_subplot(gs[2, 2:])
 order = ["uniform", "log", "measured"]
-labels = ["uniform\n(what the tool does)", "log-spaced", "measured\nlevels only"]
+labels = ["uniform (the tool)", "log-spaced", "measured levels"]
 res = [int(((grids["grid"] == g) & (grids["outcome"] == "resolved")).sum()) for g in order]
 noc = [int(((grids["grid"] == g) & (grids["outcome"] == "no_crossing")).sum()) for g in order]
 xs = np.arange(len(order))
@@ -291,13 +331,13 @@ ax.set_xticks(xs)
 ax.set_xticklabels(labels, fontsize=12)
 ax.set_ylabel("peptides")
 ax.set_ylim(0, max(np.array(res) + np.array(noc)) * 1.32)
-ax.set_title("D  ...and where the CV is read decides how many resolve at all",
+ax.set_title("H  ...and where the CV is read decides how many resolve at all",
              loc="left", fontsize=15)
 ax.legend(loc="upper right", fontsize=11.5, frameon=False)
 ax.grid(True, alpha=0.3, axis="y")
 
 fig.suptitle("Supplementary Figure - dilution spacing, not the bootstrap, sets what "
-             "the curve can measure", fontsize=18, y=0.98)
+             "the curve can measure", fontsize=18, y=0.995)
 out = repo_path(cfg["output"], "SUPP_curve_spacing")
 fig.savefig(out + ".png", dpi=300, bbox_inches="tight")
 fig.savefig(out + ".pdf", bbox_inches="tight")
