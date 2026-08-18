@@ -177,16 +177,95 @@ LODs from 26 of 27 peptides down to 9, and finite LOQs from 21 down to 7.
 
 Figure: `output/SUPP_curve_spacing.png`, from `figures/supp_curve_spacing.py`.
 
+## The readout, calibrated against a known truth
+
+The sections above compare readouts to each other. This one scores them against a
+known answer, the same way the resampler was settled. Ground truth is simulated, so
+the true CV curve and therefore the true LOQ are known exactly; each experiment is
+bootstrapped once (case resampling) and the same replicates are read back several
+ways. Two scenarios, because a readout can fail in opposite directions.
+
+**Scenario A - a true crossing exists** (true LOQ 0.0237, median LOD 0.0070).
+Counting only genuine crossings, and separating out the grid-floor values the
+current rule emits:
+
+| grid | floor values | genuine | bias of genuine |
+|---|---|---|---|
+| uniform, 100 pts | 41 of 116 | 75 | +93% |
+| uniform, 400 pts | 37 | 79 | +69% |
+| log, 100 pts | 29 | 87 | **+56%** |
+| log, 400 pts | 28 | 88 | +54% |
+| measured levels only | 33 | 82 | **+111%** |
+
+Dependence on the arbitrary `num=` parameter, same replicates read at 100 vs 400
+points:
+
+| reader | uniform | log |
+|---|---|---|
+| current | median 15.9%, max 78.6% | median 2.6%, max 4.9% |
+| interpolated | median 1.1%, max 29.0% | median 0.07%, max 0.58% |
+
+**Scenario B - the truth has no crossing at all**, so any number reported is
+fabricated:
+
+| grid | current rule | interpolated + explicit |
+|---|---|---|
+| uniform, 100 pts | **100%** (median 0.0154) | 0% |
+| uniform, 400 pts | **100%** (median 0.0078) | 0% |
+| log, 100 pts | **100%** (median 0.0056) | 1% |
+| measured levels | **100%** (median 0.0070) | 0% |
+
+The current rule invents an LOQ in every experiment where none exists, and the
+invented value is itself an artifact of grid density - it halves from 0.0154 to
+0.0078 when the grid goes from 100 to 400 points. Interpolation with an explicit
+outcome essentially never fabricates.
+
+On matched pairs, where both readers report for the same experiment, interpolation
+is also the less biased of the two: +67% against +93% on a uniform grid, +50%
+against +53% on a log grid. The current rule only *appears* less biased in the raw
+tables because its fabricated floor values sit low and drag the median down.
+
+The cost of the explicit outcome is silence: in scenario A, where a crossing really
+does exist, interpolation declines to report for 22% of experiments on a log grid
+and 34% on a uniform one. Log spacing reduces the false negatives as well as the
+bias, which is one more reason the two changes belong together.
+
+**Best combination tested: log spacing plus interpolation plus an explicit
+no-crossing outcome** - bias +50%, grid dependence 0.07%, fabrication 1%,
+declines 22%.
+
+Even so, the honest headline matches the resampling supplement: the best readout is
+still biased about +50% high with an interquartile range near 100% of the true
+value. Fixing the readout removes artifacts, it does not make the LOQ accurate. A
+14 x 3 design does not pin the LOQ.
+
+Figure: `output/SUPP_loq_readout.png`, from `figures/supp_loq_readout.py`.
+
+### Correction: reading only at measured levels is not the best option
+
+An earlier version of this note called reading the CV only at measured
+concentrations the strictest and most principled choice, on the grounds that it
+never claims quantitation at a concentration that was not run. That argument is
+still true but the option performs worst: **+111% bias, the largest of the five
+tested**, because with only 8-11 points above the LOD it is too coarse to locate
+the crossing. Appealing in principle, the loser in practice. A log grid is the
+better recommendation.
+
+Caveats: one truth pair, `bilinear` model only, B = 100, 120 experiments per
+scenario. Scenario A had to be rebuilt once - the first attempt put the true
+crossing below the LOD, so there was nothing to recover.
+
 ## Ranking, if anything is ever changed
 
-1. **Grid spacing.** Largest effect: recovers 4–6 peptides and roughly halves their
-   LOQ. The principled version is not "use a log grid" but *read the CV at spacing
-   determined by the design*. Reading only at measured concentrations is the
-   strictest form and never claims quantitation at a concentration that was not run;
-   it agrees with a log grid to a median 4.7%. A log grid is a fair approximation for
-   a log-spaced design but would over-resolve the bottom of a linear one.
-2. **Interpolated crossing**, with an explicit "no crossing in range" outcome.
-   Removes the 5–28% grid-resolution dependence.
+1. **Log grid spacing.** Largest effect: recovers 4-6 peptides, roughly halves their
+   LOQ, and against a known truth cuts the bias of genuine crossings from +93% to
+   +56% and the dependence on `num=` from a median 15.9% to 2.6%. Reading only at
+   measured levels was the earlier recommendation and is worse than either
+   (+111% bias) - see the correction above. A log grid suits a log-spaced design;
+   a linear design would want spacing matched to it instead.
+2. **Interpolated crossing**, with an explicit "no crossing in range" outcome. Removes
+   the grid-resolution dependence, and stops the tool inventing an LOQ in 100% of
+   the cases where none exists. Costs 22% false negatives on a log grid.
 3. **Resampling scheme.** Leave it alone. Simulation against a known truth shows
    the current scheme is the best calibrated of the four tested; see above.
 4. **Replicate count.** Only addresses the ~8% Monte Carlo spread, and bottoms out

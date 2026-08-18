@@ -34,6 +34,7 @@ All LOD/LOQ/ULOQ come from `calculate-loq.py` (`tools/matrix-matched_calcurves`,
 | Supp tiers | `figures/supp_tiers.py` | `supp_mnp0/` | no |
 | Supp bootstrap calibration | `figures/supp_bootstrap_calibration.py` | simulation only (ground truth known) | no |
 | Supp curve spacing | `figures/supp_curve_spacing.py` | simulation + submodule `data/one_protein.csv` | no |
+| Supp LOQ readout | `figures/supp_loq_readout.py` | simulation only (ground truth known) | no |
 | ULOQ examples (linear) | `figures/fig_uloq_examples_linear.py` | Exploris/IL15 `.elib` + Ultra II `CURVES_pep` | yes |
 
 ## Provenance notes
@@ -63,5 +64,13 @@ pass `--force` to recompute.
   Also shows the readout grid effect: reading the CV on a uniform grid, as the
   tool does, reports fewer peptides as resolved than log or measured-level
   spacing.
+
+- **LOQ readout** - scores grid spacing and the crossing rule against a known
+  truth. A log grid roughly halves the bias of genuine crossings versus the
+  uniform grid the tool uses (+56% vs +93%) and cuts the dependence on the
+  arbitrary point count from 15.9% to 2.6%. In a scenario with no true LOQ at
+  all, the current rule invents one in 100% of experiments while an
+  interpolated crossing with an explicit no-crossing outcome essentially never
+  does.
 
 See `docs/loq_grid_and_resampling_note.md` for the numbers and caveats.
