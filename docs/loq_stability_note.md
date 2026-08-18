@@ -12,6 +12,12 @@ the end. Companion to [`fit_weighting_note.md`](fit_weighting_note.md).
 > scheme differences measured here were substantially grid spacing in disguise. Read
 > [`loq_grid_and_resampling_note.md`](loq_grid_and_resampling_note.md) alongside this
 > one; the measurements below stand, the attribution does not.
+>
+> **Superseded again (2026-08-12).** This note treats stratified resampling as
+> the fix. A calibration study against a known ground truth has since shown that
+> stratified resampling *understates* uncertainty by about 20%, and that the
+> scheme already in the tool is the best calibrated of four tested. Do not read
+> this note as an argument for changing the resampler.
 
 **Not measured on the paper's datasets.** Every number below comes from
 `data/one_protein.csv`, the tool's 27-peptide sample dataset (yeast, EncyclopeDIA,

@@ -121,6 +121,62 @@ survives; the individual integers do not. If these numbers head for the manuscri
 re-run over ~10 families and report the modal category per peptide with its
 frequency.
 
+## Which bootstrap is correct? Settled by simulation
+
+Earlier versions of these notes assumed case resampling inflated the CV spuriously,
+because it lets whole levels drop out of a replicate. A simulation with known ground
+truth says the opposite. Simulating many INDEPENDENT experiments from a known curve
+gives the real sampling variability of the fitted response; a bootstrap is calibrated
+when its CV divided by that true CV is about 1.
+
+| scheme | config A (prop 0.25) | config B (prop 0.15) | verdict |
+|---|---|---|---|
+| **case (what the tool does)** | **0.96** | **0.97** | well calibrated in both |
+| stratified | 0.81 | 0.80 | understates by about 20% |
+| wild | 0.86 | 0.90 | understates by 10-15% |
+| Bayesian | 0.85 | 0.88 | understates by 12-15% |
+
+The current scheme is the best calibrated of the four. Every "more principled"
+alternative is anti-conservative: it would report the assay as more precise than it
+is. The likely mechanism is small-sample bootstrap bias - with 3 replicates per
+level, within-stratum resampling cannot express the true variance, and the wild
+bootstrap inherits shrunken fitted residuals.
+
+On the LOQ specifically no scheme wins consistently: case is +30% in config A and
++2% in B, Bayesian +7% and -4%, stratified -12% and -6%, wild -20% and -10%. The
+bias is swamped by spread - the interquartile range across replicate experiments is
+91-149% of the true LOQ itself. The schemes with the tightest IQR are exactly the
+ones that understate uncertainty, so that tightness is anti-conservatism showing up
+rather than precision.
+
+**Conclusion: do not change the resampler.** The evaluation that led to a
+`--bootstrap stratified` flag was reverted, and this is why.
+
+Figure: `output/SUPP_bootstrap_calibration.png`, from
+`figures/supp_bootstrap_calibration.py`.
+
+## What the design does instead
+
+Spending the same 42 injections on different dilution designs changes the
+*achievable* LOQ, not merely its estimate:
+
+| design | achievable LOQ |
+|---|---|
+| log-spaced, 14 levels x 3 | 0.0100 |
+| log-spaced, 7 levels x 6 | 0.0112 |
+| linear, 14 levels x 3 | 0.0536 |
+| top half only, 7 levels x 6 | 0.0637 |
+
+A linear series is roughly 5x worse than log spacing for the same instrument time,
+because it spends most of its runs where the response is already strong and none
+where the limit actually is. Trading levels for replicates (14x3 to 7x6) costs
+very little.
+
+On the sample dataset, thinning the design to drop the dense low end takes finite
+LODs from 26 of 27 peptides down to 9, and finite LOQs from 21 down to 7.
+
+Figure: `output/SUPP_curve_spacing.png`, from `figures/supp_curve_spacing.py`.
+
 ## Ranking, if anything is ever changed
 
 1. **Grid spacing.** Largest effect: recovers 4–6 peptides and roughly halves their
@@ -131,7 +187,8 @@ frequency.
    a log-spaced design but would over-resolve the bottom of a linear one.
 2. **Interpolated crossing**, with an explicit "no crossing in range" outcome.
    Removes the 5–28% grid-resolution dependence.
-3. **Resampling scheme.** Much smaller than earlier notes claimed, once 1 and 2 hold.
+3. **Resampling scheme.** Leave it alone. Simulation against a known truth shows
+   the current scheme is the best calibrated of the four tested; see above.
 4. **Replicate count.** Only addresses the ~8% Monte Carlo spread, and bottoms out
    against the design.
 

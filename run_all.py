@@ -16,6 +16,9 @@ FOM_ONLY = [
     "figures/fig02_triptychs.py",
     "figures/supp_before_after.py",
     "figures/supp_tiers.py",
+    # simulation-based methods supplements; slow on first run, then cached
+    "figures/supp_bootstrap_calibration.py",
+    "figures/supp_curve_spacing.py",
 ]
 NEEDS_RAW = [
     "figures/fig01b_examples.py",

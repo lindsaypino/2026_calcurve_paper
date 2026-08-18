@@ -32,6 +32,8 @@ All LOD/LOQ/ULOQ come from `calculate-loq.py` (`tools/matrix-matched_calcurves`,
 | Fig 3 LOQ model | `figures/fig03_loq_model.py` | ultra report-derived features | yes |
 | Supp before/after | `figures/supp_before_after.py` | `legacy_mnp2/` + `supp_mnp0/` | no |
 | Supp tiers | `figures/supp_tiers.py` | `supp_mnp0/` | no |
+| Supp bootstrap calibration | `figures/supp_bootstrap_calibration.py` | simulation only (ground truth known) | no |
+| Supp curve spacing | `figures/supp_curve_spacing.py` | simulation + submodule `data/one_protein.csv` | no |
 | ULOQ examples (linear) | `figures/fig_uloq_examples_linear.py` | Exploris/IL15 `.elib` + Ultra II `CURVES_pep` | yes |
 
 ## Provenance notes
@@ -43,3 +45,23 @@ All LOD/LOQ/ULOQ come from `calculate-loq.py` (`tools/matrix-matched_calcurves`,
   panels; within-panel comparisons are.
 - ULOQ counts are `min_noise_points`-independent (ULOQ derives from the trilinear
   fit, not the noise-point logic).
+
+## Methods supplements (simulation)
+
+Two supplements answer methods questions rather than showing results, and
+need no raw MS data. Both cache their simulations to `output/` (gitignored);
+pass `--force` to recompute.
+
+- **Bootstrap calibration** - simulates experiments from a known truth and asks
+  which resampling scheme recovers the real sampling variability. The scheme the
+  tool already uses (case) is the best calibrated; stratified, wild and Bayesian
+  resampling all understate uncertainty by 15-20%. The LOQ spread across
+  replicate experiments is larger than any difference between schemes.
+- **Curve spacing** - the same 42 injections spent on four dilution designs, plus
+  the sample dataset thinned to a coarser design. Log spacing beats linear by
+  ~5x on achievable LOQ; thinning the low end costs most peptides their LOQ.
+  Also shows the readout grid effect: reading the CV on a uniform grid, as the
+  tool does, reports fewer peptides as resolved than log or measured-level
+  spacing.
+
+See `docs/loq_grid_and_resampling_note.md` for the numbers and caveats.
