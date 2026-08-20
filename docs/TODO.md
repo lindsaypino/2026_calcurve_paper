@@ -14,10 +14,18 @@ the same content (see `run_all.py --with-raw`).
       [`fom_provenance.md`](fom_provenance.md) for the per-CSV recipe and status.
       Budget ~0.8 peptides/s per worker: the two 1.2 GB reports are ~4 h each at 6
       threads and must run one at a time on a 16 GB box.
-- [ ] **Decide stratified vs case resampling before regenerating the Bruker FOMs.**
-      See [`loq_stability_note.md`](loq_stability_note.md) — `ffb1087` still uses
-      unstratified case resampling, and switching would invalidate everything
-      regenerated under it. Under discussion as of 2026-08-12.
+- [ ] **Decide the LOQ readout before regenerating the Bruker FOMs.** This replaces
+      the stratified-resampling question, which is now settled (see Done). Two coupled
+      changes would move LOQ values: reading the CV on a log grid matched to the
+      log-spaced design rather than a uniform `linspace`, and interpolating the
+      threshold crossing with an explicit "no crossing in range" outcome instead of
+      returning the lowest grid point. Scored against a known truth in
+      [`loq_grid_and_resampling_note.md`](loq_grid_and_resampling_note.md): a log grid
+      halves the bias of genuine crossings and cuts the arbitrary grid-density
+      dependence from 15.9% to 2.6%, and where no true crossing exists the current
+      rule invents an LOQ in 100% of experiments while the interpolated rule
+      essentially never does. Neither is implemented in the tool. Switching after the
+      Bruker FOMs are regenerated would invalidate them, so decide first.
 - [ ] **Separate Bruker dataset with a ULOQ** — locate it and run it through the
       tool; decide whether it earns a panel or a supplement.
 - [ ] *(optional)* Regenerate `asms/ultra` with the **new code at mnp=2** so Fig 3's
@@ -48,6 +56,16 @@ the same content (see `run_all.py --with-raw`).
       the raw-data figures (`run_all.py --with-raw`).
 
 ## Done
+- [x] **Resampling scheme: keep case resampling.** Stratified, wild and Bayesian were
+      implemented and scored against a simulated ground truth; case resampling — what
+      the tool already does — is the best calibrated of the four (bootstrap CV / true
+      CV of 0.96–0.97 against 0.80–0.86), and every alternative understates
+      uncertainty by 15–20%. The `--bootstrap` flag written for that evaluation was
+      deliberately reverted. See `SUPP_bootstrap_calibration` and the note; the tool
+      repo's `doc/TODO.md` records it so it is not reopened.
+- [x] **Three methods supplements** (`SUPP_bootstrap_calibration`,
+      `SUPP_curve_spacing`, `SUPP_loq_readout`) — simulation-based, no raw data
+      needed, registered in `run_all.py` and the figure manifest.
 - [x] Fig 1B (distributions + examples), Fig 2A/2B/2C LOD/LOQ/ULOQ triptychs, Fig 3,
       before/after + tier supplements, ULOQ linear examples.
 - [x] Tool changes (trilinear/ULOQ, mnp=0 rescue, noted rows) committed + pinned.
