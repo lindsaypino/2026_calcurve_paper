@@ -15,6 +15,7 @@ All LOD/LOQ/ULOQ come from `calculate-loq.py` (`tools/matrix-matched_calcurves`,
 | Bruker 60SPD_pr | Ultra II, 60 SPD | DIA-NN `pr_matrix` (normalized) | 2 | `main/bruker_60spd_pr.csv` |
 | Bruker Ultra | timsTOF Ultra (Timbaux), 60 SPD | separate-search `CURVES_pep` | 2 | `main/bruker_ultra.csv` |
 | Bruker Ultra II | timsTOF Ultra II (Desnaux), 60 SPD | separate-search `CURVES_pep` | 2 | `main/bruker_ultraII.csv` |
+| SIS peptide response | timsTOF Ultra, 17 min, 5-pt 3-fold | Skyline `Peptide Total Area Fragment` | **0** (never reaches noise) | *diagnostic only — no ULOQ; see [`diagnostics.md`](diagnostics.md)* |
 
 `supp_mnp0/` = same DIA-NN datasets re-run at `min_noise_points=0`; `legacy_mnp2/`
 = the original pre-fix outputs (default mnp=2) for the before/after supplement.
@@ -33,6 +34,7 @@ All LOD/LOQ/ULOQ come from `calculate-loq.py` (`tools/matrix-matched_calcurves`,
 | Supp before/after | `figures/supp_before_after.py` | `legacy_mnp2/` + `supp_mnp0/` | no |
 | Supp tiers | `figures/supp_tiers.py` | `supp_mnp0/` | no |
 | ULOQ examples (linear) | `figures/fig_uloq_examples_linear.py` | Exploris/IL15 `.elib` + Ultra II `CURVES_pep` | yes |
+| *diag:* SIS curves | `figures/diag_sis_curves.py` | SIS Skyline export + `.sky` | yes |
 
 ## Provenance notes
 - **Ultra vs Ultra II (2B)** are method-matched (60 SPD, 100 ng, 75 ms, 250310),
@@ -42,4 +44,6 @@ All LOD/LOQ/ULOQ come from `calculate-loq.py` (`tools/matrix-matched_calcurves`,
   pipeline — different experiments, so absolute counts are NOT comparable across
   panels; within-panel comparisons are.
 - ULOQ counts are `min_noise_points`-independent (ULOQ derives from the trilinear
-  fit, not the noise-point logic).
+  fit, not the noise-point logic). They are **not** `min_saturation_points`-independent,
+  and that sensitivity has not been swept for these datasets — see
+  [`diagnostics.md`](diagnostics.md) for the audit tool and the open question.
