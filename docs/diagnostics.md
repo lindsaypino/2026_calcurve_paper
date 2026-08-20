@@ -84,6 +84,20 @@ accepted set the tool actually produced.
 - [ ] Decide whether the SIS work earns a supplement. The defensible framings are "the
       Ultra's linear range extends past the top of a 5-point SIS curve" and/or a clean
       demonstration of the mnp=0 rescue (6/26 → 19/26 finite LODs).
+- [ ] **Track down `250528_Ultra2023_HumanYeast_100ng_Calcurves`.** Named 2026-08-20 as a
+      possible replacement ULOQ dataset, but not found on this machine: not under
+      `2023_bruker_ultra/data/` (29 folders, no `250528_*`), not anywhere in
+      `G:/My Drive/Lindsay Pino/` to depth 6 for `*250528*` (only two unrelated
+      `code-benchmark_*_20250528.ipynb` notebooks), not in `G:/My Drive/` to depth 4 for
+      `*Ultra2023*`, not in `2025_calcurves_asms/data/`, not in `Downloads/`, and not
+      mentioned in this repo. Nearest Drive names are `250515_CalCurve_HumanYeast_Timbaux`
+      and `250526_CalCurve_HumanYeast_Desnaux_{60,100}SPD`. Two things to settle: where it
+      lives (instrument PC, Bruker share, S3, PRIDE, or a Drive folder outside
+      `Lindsay Pino/`), and whether it is meant to replace the SIS curve. The name reads as
+      a matrix-matched human/yeast curve at 100 ng — the same design as the Timbaux/Desnaux
+      curves in Fig 2, not an SIS peptide-response curve. That would be the better ULOQ
+      candidate, because a matrix-matched curve can carry its top points into saturation,
+      which is what the 240610 SIS curve lacked.
 
 ## Open — worth a second look in the tool source (submodule)
 
