@@ -16,6 +16,13 @@ raw:
   # Fig 3 retention-time / m/z / abundance needs the full DIA-NN report
   ultra_diann_report: "${bruker_ultra}/data/asms/ultra/diann_report.tsv"
 
+  # SIS/AQUA peptide-response curve on the Ultra (candidate ULOQ dataset; Skyline
+  # export + its .sky, which is where the per-replicate concentrations live).
+  # 5 points x 3-fold x 3 replicates; analyte is the HEAVY channel.
+  sis_ultra_dir:    "C:/Users/linds/Downloads/240610_SIS_peptide_response_Ultra_BC_refined_2024-06-10_12-13-53"
+  sis_ultra_export: "${sis_ultra_dir}/240610_SIS_peptide_response_Ultra_BC_refined_2024-06-10_12-13-53 - Peptide Total Area Fragment.csv"
+  sis_ultra_sky:    "${sis_ultra_dir}/240610_SIS_peptide_response_Ultra_BC_refined.sky"
+
 # --- the LOD/LOQ/ULOQ tool (pinned submodule) -----------------------------------
 tool:
   calculate_loq: "tools/matrix-matched_calcurves/bin/calculate-loq.py"
