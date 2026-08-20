@@ -12,9 +12,9 @@ diann_report*.tsv
 data/figuresofmerit/
 
 # generated figures (regenerate with `make`); commit finals by hand if desired
-output/*.png
-output/*.pdf
-output/*.svg
+output/**/*.png
+output/**/*.pdf
+output/**/*.svg
 
 # python
 __pycache__/
