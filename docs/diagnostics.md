@@ -120,3 +120,20 @@ Diagnostic figures land in `output/` (gitignored):
 |---|---|
 | `diag_sis_curves.png` | [`figures/diag_sis_curves.py`](../figures/diag_sis_curves.py) — all 26 curves log-log, one column per spike group, slope-1 reference + top-step ratio |
 | `diag_sis_uloq_toolfits.png` | the tool's own `--plot y` output for the 7 msp=1 ULOQ peptides, tiled |
+
+The run's inputs and figures of merit are committed under
+[`output/sis_run/`](../output/sis_run/): the three tool-ready inputs, the melted frame,
+and the three FOM runs (`fom_mnp0_msp2.csv` is the defensible one). The 26 per-peptide
+`--plot y` PNGs are not — they are regenerable, and gitignored.
+
+To regenerate the whole SIS chain from the raw export:
+
+```bash
+python -m src.prep_skyline_sis "<export.csv>" "<document.sky>" <out_dir>
+python tools/matrix-matched_calcurves/bin/calculate-loq.py \
+    <out_dir>/sis_ultra_skyline.csv <out_dir>/sis_ultra_map.csv \
+    --multiplier_file <out_dir>/sis_ultra_multipliers.csv \
+    --model auto --plot n --min_noise_points 0 --min_saturation_points 2 \
+    --output_path <out_dir>/fom
+python figures/diag_sis_curves.py --fom <out_dir>/fom/figuresofmerit.csv
+```

@@ -36,6 +36,12 @@ the same content (see `run_all.py --with-raw`).
       "the Ultra's linear range extends past the top of a 5-point SIS curve", and/or the
       mnp=0 rescue demonstration (6/26 → 19/26 finite LODs). Collaborator has been asked
       whether higher spike levels are feasible.
+- [ ] **Send the collaborator email** — draft at
+      [`output/sis_run/sis_collaborator_update.md`](../output/sis_run/sis_collaborator_update.md),
+      needs only `[Name]` filled in. It asks whether spike levels above the current top
+      point are feasible, which is the only route to a real ULOQ from this experiment.
+      It deliberately does *not* mention the `--min_saturation_points 1` workaround —
+      keep it that way.
 - [ ] **Audit `n_sat` behind the existing ULOQ panels** (Fig 1B distributions, Fig 2
       triptychs, the ULOQ example peptides). Untested, and an example peptide resting on
       a thin plateau would be a weak feature. Blocked on populating
