@@ -171,8 +171,10 @@ def to_skyline(csv_path, sky_path, out_dir, channel="heavy", drop_irt=True, pref
         .sort_values(["concentration", "filename"])
         .to_csv(cmap, index=False))
 
-    # 3. peptide -> multiplier. Peptides absent here are dropped by the tool's inner
-    #    join, so a missing multiplier silently loses a peptide — fail loudly instead.
+    # 3. peptide -> multiplier. The tool left-joins these as of ffb1087, so a peptide
+    #    with no multiplier is kept, its curve points go to NaN, its figures of merit
+    #    come back non-finite, and it gets a stderr warning. Fail loudly here anyway:
+    #    a curve that cannot be scaled is a prep error, not a result.
     mult = tidy[["peptide", "multiplier"]].drop_duplicates()
     if mult["multiplier"].isna().any():
         missing = mult.loc[mult["multiplier"].isna(), "peptide"].tolist()

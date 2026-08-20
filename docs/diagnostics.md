@@ -3,7 +3,7 @@
 Internal notes from investigating the figures-of-merit machinery — findings that
 aren't a paper panel but that we may want to revisit, either across the other
 figures or in the pinned tool source. Line numbers refer to the pinned submodule
-commit `ac0b951`.
+commit `ffb1087`.
 
 ## Settled: the 240610 SIS dataset has no ULOQ in it
 
@@ -87,28 +87,29 @@ accepted set the tool actually produced.
 
 ## Open — worth a second look in the tool source (submodule)
 
-- [ ] **`std_sat` pushes the ULOQ the wrong way.** `calculate_uloq` (~line 523) computes
-      `ULOQ = (c_high - std_mult*std_sat - intercept)/slope`. When the plateau rests on
-      one concentration, `std_sat` is just that concentration's replicate spread, so a
-      *noisier* top point yields a *lower* ULOQ — i.e. a narrower claimed quantifiable
-      range. That is backwards: added noise should widen uncertainty, not tighten the
-      range. On the SIS data it drags ULOQ well below the onset (45 vs onset ~90 for
-      `LGQHLATEPLGTNSWER`). Check whether it materially moves ULOQ on the real datasets.
-- [ ] **Short curves have exactly one viable `n_sat`.** Line 368 refuses a trilinear fit
-      below 5 distinct curve points, and line 392 caps the plateau via
+- [ ] **`std_sat` pushes the ULOQ the wrong way.** `calculate_uloq` (line 560) computes
+      `ULOQ = (c_high - std_mult*std_sat - intercept)/slope` at line 577. When the
+      plateau rests on one concentration, `std_sat` is just that concentration's
+      replicate spread, so a *noisier* top point yields a *lower* ULOQ — i.e. a
+      narrower claimed quantifiable range. That is backwards: added noise should widen
+      uncertainty, not tighten the range. On the SIS data it drags ULOQ well below the
+      onset (45 vs onset ~90 for `LGQHLATEPLGTNSWER`). Check whether it materially
+      moves ULOQ on the real datasets.
+- [ ] **Short curves have exactly one viable `n_sat`.** Line 414 refuses a trilinear fit
+      below 5 distinct curve points, and line 438 caps the plateau via
       `2*n_sat <= n_distinct`. At `n_distinct == 5` that leaves `n_sat == 2` as the only
       value satisfying both it and the msp=2 minimum. Worth deciding whether the
       minority rule should scale differently for short curves, and worth stating the
       ≥5-point gate in Methods — it silently makes a ULOQ impossible for ≤4-point
       curves, and isn't in the README settings table.
-- [ ] **Document which CV the LOQ thresholds.** Lines 667–678 plot and threshold the CV
+- [ ] **Document which CV the LOQ thresholds.** Lines 723–730 plot and threshold the CV
       of bootstrap-resampled *means*, not the raw replicate CV — with n=3 that is a ~1.7×
       difference and it directly sets the LOQ. Legitimate choice, but Methods should say
       which. Related asymmetry worth a sentence: LOQ is CV-gated, ULOQ is purely
       geometric with no CV check at all.
 - [ ] **Cosmetic: ULOQ is drawn but never labeled.** `build_plots` draws the ULOQ
-      vertical in the top panel (line 646) but builds the legend from the *bottom*
-      subplot (line 705), which re-draws only LOD and LOQ (lines 680–686). So generated
+      vertical in the top panel (line 700) but builds the legend from the *bottom*
+      subplot (line 759), which re-draws only LOD and LOQ (lines 734–740). So generated
       PNGs show an unlabeled orange line and no ULOQ legend entry — worth fixing before
       any of these plots go into a supplement.
 
