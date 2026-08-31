@@ -67,6 +67,14 @@ the same content (see `run_all.py --with-raw`).
       **Desnaux = Ultra II** (both filenames say "Ultra" = product family).
 
 ## Figures
+- [ ] **Fig 2: the fourth box-and-whisker panel is written but never rendered
+      (raised 2026-08-31).** `figures/fig02_triptychs.py` carries an uncommitted +39/-4
+      edit that turns each triptych into four axes — the three FOM densities plus a
+      panel repeating them as box-and-whisker pairs (1.5x IQR whiskers, fliers hidden
+      because n is in the thousands). It has never been executed: no `FIG2*` output
+      exists anywhere in the repo. Blocked on populating `data/figuresofmerit/`, the
+      same blocker as the `n_sat` audit above. Run it, look at the output, then commit.
+      Until then the edit lives only in this working tree.
 - [ ] Coauthor review of example-peptide selection and panel labels.
 - [ ] Decide final home/order of the two supplements (before/after, detection-floored
       tiers) and the ULOQ linear-examples / distribution panels.
