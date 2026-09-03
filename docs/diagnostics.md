@@ -152,3 +152,114 @@ python tools/matrix-matched_calcurves/bin/calculate-loq.py \
     --output_path <out_dir>/fom
 python figures/diag_sis_curves.py --fom <out_dir>/fom/figuresofmerit.csv
 ```
+
+## Reusable: never subset a report to a handful of peptides
+
+Recorded 2026-09-03. Measured on `260521_RH4_Calcurves` — RH4, human+yeast database,
+36 runs, 12 curve points x 3 replicates, DIA-NN `diann_report.tsv`. Line numbers in
+this section and the next refer to submodule commit `61414c6`.
+
+To plot six PAX3/FOXO1 precursors, the report was filtered down to just those
+precursors' rows. That produces **wrong figures of merit**, silently — no note, no
+warning, `n_curvepoints` still reads 12.
+
+The six are identified in only 17 of the 36 runs, and in **none of the three blanks**.
+`_complete_grid` ([`bin/calculate-loq.py:77`](../tools/matrix-matched_calcurves/bin/calculate-loq.py#L77))
+builds its dense grid from the runs present in the input and, by design, refuses to
+invent a column for a run that is absent — its docstring is explicit that doing so
+"would fabricate data rather than restore it". The behaviour is documented; the failure
+mode is not. Filtering by peptide removes runs as a side effect, and with the blanks
+gone the noise plateau the LOD is fit from goes with them.
+
+Against the full 55,717-precursor run:
+
+| precursor | LOD, subset | LOD, full | |
+|---|---|---|---|
+| TTFTAEQLEELER2 | 0.0158 | 0.0496 | -68% |
+| SGFPLEVSTPLGQGR2 | 0.0434 | 0.0662 | -34% |
+| LPSDLDGMFIER2 | 0.0545 | 0.0743 | -27% |
+| SSWWMLNPEGGK2 | `inf` | 0.0353 | flipped |
+| YQETGSIRPGAIGGSKPK3 | `inf` | 0.0770 | flipped |
+| ENPGMFSWEIR2 | 0.3000 | 0.3000 | unchanged |
+
+`slope_linear` was low by 3-13% as well, so this is not confined to the noise segment.
+
+**How to subset safely.** Add one carrier precursor identified in all runs, so the run
+set is restored, then confirm the subset reproduces the full run before trusting it.
+Doing that here made all six agree with the full run exactly, on every column. A
+carrier is easy to find:
+
+```bash
+# precursors seen in all 36 runs
+awk -F'\t' 'NR>1{k=$3; if(!(k SUBSEP $1 in s)){s[k SUBSEP $1]=1; c[k]++}}
+            END{for(k in c) if(c[k]==36) print k}' diann_report.tsv | head
+```
+
+## Settled: `min_noise_points` reports the *most* sensitive peptides as `inf`
+
+Recorded 2026-09-03. Second sighting of the effect already noted for the SIS dataset
+above, on unrelated data and with the code path pinned down.
+
+[`bin/calculate-loq.py:520-522`](../tools/matrix-matched_calcurves/bin/calculate-loq.py#L520)
+forces **both** `LOD` and `stndev_noise` to `inf` when fewer than `min_noise_points`
+distinct curve points fall *below* the computed LOD:
+
+```python
+elif df["curvepoint"][~mask].nunique() < min_noise_points:
+    # if there's not enough below the LOD
+    lod_results = [np.inf, np.inf]
+```
+
+At the mnp=2 default, a peptide sensitive enough that its LOD lands below the
+second-lowest dilution is rejected for lack of noise points. In `figuresofmerit.csv`
+it is indistinguishable from a peptide that never rose out of the noise — same `inf`,
+empty `notes`.
+
+Two of ten SIX1/SIX2 precursors on `260521_RH4_Calcurves` hit this. Re-running with
+`--min_noise_points 1`:
+
+| precursor | LOD default | LOD mnp=1 | LOQ default | LOQ mnp=1 |
+|---|---|---|---|---|
+| FLWSLPAC(UniMod4)DHLHK3 | `inf` | 1.3e-11 | `inf` | **0.0202** |
+| LQQLWLK2 | `inf` | 1.1e-11 | `inf` | **0.0505** |
+| AVVAFHR2 | 0.0184 | 0.0184 | `inf` | `inf` |
+| TIWDGEETSYC(UniMod4)FK2 | 0.1495 | 0.1495 | `inf` | `inf` |
+| ILESHQFSPHNHPK3 | 0.0118 | 0.0118 | 0.0517 | 0.0517 |
+
+The other eight are bit-identical, which confirms the gate is what fired rather than a
+different fit. The two suppressed precursors have the **best** LOQs of the ten; their
+LODs sit below the lowest point tested (0.005), so the curve bottoms out above their
+detection limit.
+
+Consequence for the paper: an `inf` LOD count is not a count of undetectable peptides.
+Anywhere we report finite-LOD fractions, the denominator mixes two populations —
+too noisy to detect, and too sensitive for the curve's dynamic range. Separating them
+needs either a more dilute bottom point or an mnp sweep.
+
+## Settled: the search database sets the blank, and the blank sets the LOD
+
+Recorded 2026-09-03. Same 36 RH4 acquisitions searched two ways.
+
+Residual human signal at the 0% point, as a fraction of the 100% point:
+
+| search database | human at blank | ratio |
+|---|---|---|
+| human only | 4.5e9 / 1.09e11 | 4.1% |
+| human + yeast | 6.15e8 / 6.15e10 | **1.0%** |
+
+Adding the second proteome removes about three quarters of the apparent human signal
+in a sample containing no human analyte — that signal was matrix peptides with nowhere
+correct to go. Human identifications at the blank are 2,395, against 157,526 at full
+strength.
+
+**The two rows are not a matched measurement.** The human-only figures are protein-group
+totals carried over from a separate analysis of `260526_calcurve-rodeo_RH4_EXP61` and
+were not re-measured here; the human+yeast figures are sums of `Precursor.Quantity` over
+identified precursors, measured directly. The direction and rough magnitude are solid,
+the exact percentages are not comparable.
+
+Why it matters here rather than as a general search-quality point: LOD and LOQ are fit
+from the blank. A database that leaves matrix peptides unassigned inflates the noise
+plateau, and every LOD downstream of it is correspondingly conservative. Any
+figures-of-merit comparison across datasets has to hold the database constant, or say
+that it does not.
