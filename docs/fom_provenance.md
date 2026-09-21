@@ -115,10 +115,18 @@ process to ~4 GB resident and must be run **one at a time** on a 16 GB machine.
 
 ## Open decision that affects every number here
 
-`docs/loq_stability_note.md` records that the bootstrap uses unstratified case
-resampling, which is the dominant source of LOQ instability (up to 310% spread on one
-sample peptide, 0.0% under stratified resampling), and that adopting stratified
-resampling is a decision to make *before* regenerating figures of merit. As of
-`ffb1087` the tool still uses case resampling
-(`bin/calculate-loq.py` → `_bootstrap_once`), and every CSV above was produced under
-it. If that scheme changes, everything in this table needs regenerating again.
+The resampling scheme is **settled: keep case resampling.** A calibration study against
+a known ground truth showed the tool's existing case bootstrap is the best calibrated of
+four schemes (bootstrap CV / true CV 0.96-0.97), while stratified, wild and Bayesian each
+understate uncertainty by 15-20%; the `--bootstrap stratified` flag written for that
+evaluation was reverted. See
+[`loq_grid_and_resampling_note.md`](loq_grid_and_resampling_note.md) and the now-superseded
+[`loq_stability_note.md`](loq_stability_note.md). The tool still uses case resampling
+(`bin/calculate-loq.py` -> `_bootstrap_once`), as every CSV above was.
+
+What *is* still open is how `calculate_loq` reads the LOQ off the bootstrap CV curve — the
+readout grid (uniform vs log) and the crossing rule (grid-snap vs interpolate), tracked as
+matrix-matched_calcurves#21. That choice moves the LOQ (median ~5%, up to ~50% for a
+crossing that sits low in the readout range), so it must be settled *before* regenerating
+the Bruker figures of merit; changing it afterward would invalidate them. It touches
+neither LOD nor ULOQ.

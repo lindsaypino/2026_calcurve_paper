@@ -30,7 +30,7 @@ All LOD/LOQ/ULOQ come from `calculate-loq.py` (`tools/matrix-matched_calcurves`,
 | Fig 2B hardware | `figures/fig02_triptychs.py` | `main/bruker_ultra{,II}.csv` | no |
 | Fig 2C software | `figures/fig02_triptychs.py` | `main/bruker_60spd{,_pr}.csv` | no |
 | Fig 3 RT/mz/abund | `figures/fig03_retentiontime.py` | `legacy_mnp2/bruker_ultra.csv` + ultra `diann_report` | yes |
-| Fig 3 LOQ model | `figures/fig03_loq_model.py` | ultra report-derived features | yes |
+| Fig 3 LOQ model *(planned)* | `figures/fig03_loq_model.py` — **not yet written** | ultra report-derived features | yes |
 | Supp before/after | `figures/supp_before_after.py` | `legacy_mnp2/` + `supp_mnp0/` | no |
 | Supp tiers | `figures/supp_tiers.py` | `supp_mnp0/` | no |
 | Supp bootstrap calibration | `figures/supp_bootstrap_calibration.py` | simulation only (ground truth known) | no |

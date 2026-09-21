@@ -2,8 +2,10 @@
 
 Internal notes from investigating the figures-of-merit machinery — findings that
 aren't a paper panel but that we may want to revisit, either across the other
-figures or in the pinned tool source. Line numbers refer to the pinned submodule
-commit `ffb1087`.
+figures or in the pinned tool source. Line numbers are indicative and tie to the
+commit noted in each section (`ffb1087` above the RH4 notes, `61414c6` below); the
+function names are the stable reference. The submodule is now pinned at `d80f50e`, so
+exact line numbers may have drifted — search by function name, not line.
 
 ## Settled: the 240610 SIS dataset has no ULOQ in it
 
