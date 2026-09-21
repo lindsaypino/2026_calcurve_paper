@@ -255,6 +255,101 @@ Caveats: one truth pair, `bilinear` model only, B = 100, 120 experiments per
 scenario. Scenario A had to be rebuilt once - the first attempt put the true
 crossing below the LOD, so there was nothing to recover.
 
+## The grid must match the design spacing - confirmed on the pinned tool
+
+Everything above was evaluated against `54c3f36` from patched copies. Re-run against
+the **pinned tool** (`d80f50e`) on `data/one_protein.csv`, bootstrapping each peptide
+once on a *combined* grid (uniform 100 pts ++ log 100 pts) so both readouts see the
+identical replicates and the only difference is spacing:
+
+| readout | resolved | floor-pinned / no-crossing | no LOQ |
+|---|---|---|---|
+| uniform grid (current code) | 15 | 9 floor-pinned | 3 |
+| log grid alone | 24 | - | 3 |
+| log + interpolation + explicit no-crossing | 19 | 5 no-crossing | 3 |
+
+This confirms the earlier finding on the current pin: log spacing alone rescues the
+real crossings the uniform grid floor-pins, but over-reports - 5 of its 24 have no
+genuine crossing - and adding the explicit no-crossing outcome gives the honest
+19/5/3. Largest downward moves under log spacing: `VVEILQNR` 0.0129 -> 0.0061,
+`VLEFHPFDPVSK` 0.0191 -> 0.0095, `TVEEDHPIPEDVHENYENK` 0.0179 -> 0.0106. Counts carry
+a few peptides of bootstrap seed noise; the ordering is robust, the integers are not.
+
+**A log grid helps only when the LOQ sits low in the readout range; it is not simply
+"match the grid to the design."** The grid sets where the fitted CV curve is sampled
+for the crossing, and it wants its finest resolution where the crossing sits. A
+known-truth test on a log-spaced and a linear-spaced 14x3 design, scored by within-2x
+recovery of the true LOQ (current rule):
+
+| design | true LOQ | uniform grid | log grid |
+|---|---|---|---|
+| log    | 0.0036 (low in range)  | 0%  | **50%** |
+| log    | 0.027  (high in range) | **74%** | 32% |
+| linear | 0.060                  | 0%  | 0% |
+| linear | 0.128                  | 25% | 25% |
+
+The grid matters only when the true LOQ is *low relative to* `[LOD, upper]` - there the
+log grid wins decisively. When the LOQ is high in the range the uniform grid is as good
+or better (the log grid over-resolves an irrelevant bottom). On a linear design the two
+tie: a linear design barely samples low concentrations, so the LOQ is pushed high and
+the grid choice washes out. So the earlier "log design -> log grid, linear design ->
+linear grid" framing is only half right - the linear->linear half is not supported.
+Practical read: a log grid is a sound default for the paper's log-spaced,
+wide-dynamic-range curves (where the LOQ sits low), neutral on linear designs, and can
+be slightly worse only when the LOQ sits high in the range. Tracked as
+matrix-matched_calcurves#21. Sim: `loq_grid_vs_design.py` (session scratchpad).
+
+## Accuracy against a known truth is regime-dependent - the literature-favored
+## option is not the most accurate here
+
+Recorded 2026-09-21. A multi-scenario known-truth simulation (bilinear model, case
+bootstrap, ~150 experiments per scenario; the true CV crossing, and therefore the
+true LOQ, is known exactly) scored all four readouts on how often the *reported* LOQ
+lands within 2x of the truth - declines counted as misses, so the metric rewards
+being both accurate and willing to report. This is a fairer metric than the bias
+of resolved crossings, which is conditional on reporting and flatters the
+interpolated readouts.
+
+Fraction of experiments within 2x of the true LOQ, by where the true LOQ falls
+(log-spaced 14x3 design):
+
+| true LOQ | uniform+current (current code) | log+current | uniform+interp | log+interp |
+|---|---|---|---|---|
+| 0.0017 (below the design's reach) | 0% | 3% | 0% | 0% |
+| 0.0023 | 0% | 23% | 0% | 0% |
+| 0.0049 (low-mid) | 0% | **74%** | 0% | 19% |
+| 0.0166 (high in range) | **65%** | 32% | 14% | 26% |
+
+Findings:
+
+- **No option is uniformly most accurate.** It depends on where the LOQ sits.
+- **log+current is the best all-round recovery where these assays operate** (LOQ
+  low-to-mid), because it always reports and log spacing removes the uniform grid's
+  floor bias. This is the option the literature does *not* single out.
+- **The current code (uniform+current) is best only when the LOQ is high in the
+  range** (0.0166), where the uniform grid resolves finely and it is near-unbiased.
+- **The interpolated readouts recover the LOQ worst here.** They decline so often
+  (report rates 0-63%) that coverage collapses, and their reported values are an
+  upward-biased subset. Their virtue is not fabricating, not accuracy; and in a
+  genuine no-crossing regime they still reported an LOQ in ~40% of experiments.
+- **Below what the 14-point design samples (<~0.002), nothing recovers the LOQ** - a
+  design limit, not a readout fixable.
+
+This is the opposite of the "log + interpolation is best" reading that `SUPP_loq_readout`
+suggested, and the two are reconciled by the metric: that supplement scored bias among
+resolved crossings only, at a higher true LOQ (~0.024). Once declines are penalized and
+several regimes are scored, interpolation loses. **So the #21 decision has two honest
+answers: recover-a-number accuracy -> log+current; regulatory defensibility (don't
+fabricate) -> log+interpolation.**
+
+Caveats: one error model, bilinear only, ~150 experiments per scenario; the verdict
+flips with the metric (bias-on-reported vs coverage). A grid-vs-design test (log vs
+linear dilution design) was run to check whether the grid preference tracks the design;
+see the sim scripts. Scripts live in the session scratchpad, not the repo:
+`loq_accuracy_multi.py` (+ `loq_accuracy_report.py` for the corrected analysis) and
+`loq_grid_vs_design.py`. Not paper-grade until hardened with more scenarios and a
+second error model.
+
 ## Ranking, if anything is ever changed
 
 1. **Log grid spacing.** Largest effect: recovers 4-6 peptides, roughly halves their
