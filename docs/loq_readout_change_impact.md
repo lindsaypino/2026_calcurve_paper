@@ -63,11 +63,17 @@ pinned to the lowest grid point."
 
 ## Status
 
-Confirmed on `il15_prm`, `exploris_dia`, `bruker_ultraII` (installed to
-`data/figuresofmerit/main/`). The four DIA-NN Bruker sets (`60spd`/`100spd`/`60spd_pr` main +
-`60spd`/`100spd`/`ultra` supp_mnp0) are regenerating against `6a017bb`; their before/after
-rows will be added here, and `fom_provenance.md` updated, once they land. `legacy_mnp2` stays
-frozen. Pre-change FOM backed up in the session scratchpad (`fom_backup/`).
+All 10 non-legacy FOM CSVs are regenerated against `6a017bb` and installed under
+`data/figuresofmerit/` (completed 2026-09-23; every Bruker run exited cleanly). Per-CSV row
+and loq-outcome counts are in [`fom_provenance.md`](fom_provenance.md). `legacy_mnp2` stays
+frozen. Pre-change FOM is backed up in the session scratchpad (`fom_backup/`).
+
+The before/after characterization above (LOD/ULOQ bit-identical, small LOQ shift) was measured
+by running the pre-change tool (`d80f50e`) against the new one in the same environment on
+`il15_prm`, `exploris_dia`, and `bruker_ultraII` — three representative datasets spanning
+targeted PRM, wide-format DIA, and hardware CURVES_pep. Because the change never touches the
+fit, LOD and ULOQ are unchanged for the Bruker DIA-NN sets by construction; a per-set
+before/after on those would require re-running the old code (~a day) and was not done.
 
 Reproduce: `compare_before_after.py`, `uloq_check.py`, `scatter_before_after.py` (session
 scratchpad); run the pinned tool and its `d80f50e` worktree in the same venv on the raw inputs.

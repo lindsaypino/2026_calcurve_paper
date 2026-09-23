@@ -5,15 +5,12 @@ FOM-only panels reproduce pixel-identically, the three raw-data figures reproduc
 the same content (see `run_all.py --with-raw`).
 
 ## Data / analysis
-- [ ] **Regenerate the remaining FOMs against the current tool.** The submodule is now
-      bumped to `ffb1087` (was `ac0b951`, three commits behind). The two EncyclopeDIA
-      datasets are done and came back **numerically identical** — `3d18164` (DIA-NN
-      densification) and `ffa5118` (canonical row order) have nothing to bite on in an
-      already-dense wide-format matrix, confirmed by a control run at the old pin. The
-      six Bruker DIA-NN FOMs are where the movement lives and are still stale; see
-      [`fom_provenance.md`](fom_provenance.md) for the per-CSV recipe and status.
-      Budget ~0.8 peptides/s per worker: the two 1.2 GB reports are ~4 h each at 6
-      threads and must run one at a time on a 16 GB box.
+- [x] **Regenerate all FOMs against the interpolated-readout tool.** Done 2026-09-23: all
+      10 non-legacy CSVs regenerated against `6a017bb` (submodule `ffff0e8`), running one
+      1.2 GB DIA-NN report at a time. LOD and ULOQ unchanged, LOQ shifts small; see
+      [`fom_provenance.md`](fom_provenance.md) and
+      [`loq_readout_change_impact.md`](loq_readout_change_impact.md). `legacy_mnp2` stays
+      frozen.
 - [x] **LOQ readout: decided and merged.** The CV crossing is now interpolated on a grid
       matched to the dilution design (log for a log-spaced series), with an explicit
       no-crossing outcome, replacing grid-snap on a uniform `linspace`. Merged as tool PR
