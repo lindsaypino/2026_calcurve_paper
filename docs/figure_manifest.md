@@ -66,12 +66,12 @@ pass `--force` to recompute.
   the sample dataset thinned to a coarser design. Log spacing beats linear by
   ~5x on achievable LOQ; thinning the low end costs most peptides their LOQ.
   Also shows the readout grid effect: reading the CV on a uniform grid, as the
-  tool does, reports fewer peptides as resolved than log or measured-level
-  spacing.
+  tool did before the interpolated readout, reports fewer peptides as resolved
+  than log or measured-level spacing.
 
 - **LOQ readout** - scores grid spacing and the crossing rule against a known
   truth. A log grid roughly halves the bias of genuine crossings versus the
-  uniform grid the tool uses (+56% vs +93%) and cuts the dependence on the
+  uniform grid the tool used before it (+56% vs +93%) and cuts the dependence on the
   arbitrary point count from 15.9% to 2.6%. In a scenario with no true LOQ at
   all, the current rule invents one in 100% of experiments while an
   interpolated crossing with an explicit no-crossing outcome essentially never

@@ -14,18 +14,12 @@ the same content (see `run_all.py --with-raw`).
       [`fom_provenance.md`](fom_provenance.md) for the per-CSV recipe and status.
       Budget ~0.8 peptides/s per worker: the two 1.2 GB reports are ~4 h each at 6
       threads and must run one at a time on a 16 GB box.
-- [ ] **Decide the LOQ readout before regenerating the Bruker FOMs.** This replaces
-      the stratified-resampling question, which is now settled (see Done). Two coupled
-      changes would move LOQ values: reading the CV on a log grid matched to the
-      log-spaced design rather than a uniform `linspace`, and interpolating the
-      threshold crossing with an explicit "no crossing in range" outcome instead of
-      returning the lowest grid point. Scored against a known truth in
-      [`loq_grid_and_resampling_note.md`](loq_grid_and_resampling_note.md): a log grid
-      halves the bias of genuine crossings and cuts the arbitrary grid-density
-      dependence from 15.9% to 2.6%, and where no true crossing exists the current
-      rule invents an LOQ in 100% of experiments while the interpolated rule
-      essentially never does. Neither is implemented in the tool. Switching after the
-      Bruker FOMs are regenerated would invalidate them, so decide first.
+- [x] **LOQ readout: decided and merged.** The CV crossing is now interpolated on a grid
+      matched to the dilution design (log for a log-spaced series), with an explicit
+      no-crossing outcome, replacing grid-snap on a uniform `linspace`. Merged as tool PR
+      #23 (`6a017bb`); submodule bumped (`ffff0e8`). LOD and ULOQ unchanged; LOQ shifts
+      small (see [`loq_readout_change_impact.md`](loq_readout_change_impact.md)). Bruker
+      FOMs are being regenerated against the new pin.
 - [x] **Separate Bruker dataset with a ULOQ** — located (`240610_SIS_peptide_response_
       Ultra_BC_refined`) and run through the tool. **It has no ULOQ in it**: the
       saturation clause fails 26/26 because the curves are still climbing at the top

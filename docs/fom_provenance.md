@@ -113,7 +113,7 @@ Roughly 0.8 peptides/s per worker on an 8-core / 16 GB box, so a 60,000-peptide
 dataset is a ~4 hour run at 6 threads. The 1.2 GB DIA-NN reports take the parent
 process to ~4 GB resident and must be run **one at a time** on a 16 GB machine.
 
-## Open decision that affects every number here
+## Method decisions behind these numbers
 
 The resampling scheme is **settled: keep case resampling.** A calibration study against
 a known ground truth showed the tool's existing case bootstrap is the best calibrated of
@@ -124,9 +124,9 @@ evaluation was reverted. See
 [`loq_stability_note.md`](loq_stability_note.md). The tool still uses case resampling
 (`bin/calculate-loq.py` -> `_bootstrap_once`), as every CSV above was.
 
-What *is* still open is how `calculate_loq` reads the LOQ off the bootstrap CV curve — the
-readout grid (uniform vs log) and the crossing rule (grid-snap vs interpolate), tracked as
-matrix-matched_calcurves#21. That choice moves the LOQ (median ~5%, up to ~50% for a
-crossing that sits low in the readout range), so it must be settled *before* regenerating
-the Bruker figures of merit; changing it afterward would invalidate them. It touches
-neither LOD nor ULOQ.
+The LOQ readout is **settled and merged** (matrix-matched_calcurves#21): the LOQ crossing is
+interpolated on a grid matched to the dilution design, with an explicit no-crossing outcome,
+replacing the grid-snap on a uniform grid. Merged as tool `6a017bb`; the submodule is pinned
+to it (`ffff0e8`, 2026-09-22). The figures of merit are being regenerated against this pin.
+LOD and ULOQ are unchanged; the LOQ shift is small (median -1.7% on exploris_dia, -0.8% on
+ultraII; see [`loq_readout_change_impact.md`](loq_readout_change_impact.md)).

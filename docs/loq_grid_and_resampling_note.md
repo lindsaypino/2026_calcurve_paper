@@ -1,5 +1,12 @@
 # Note: where the CV is read matters more than how it is resampled
 
+> **Implemented 2026-09-22.** The interpolated, design-matched readout this note argues
+> for is now the tool's behavior (merged as `6a017bb`; submodule pinned `ffff0e8`). The
+> "(current code)" / "the tool uses" labels below refer to the pre-merge grid-snap readout
+> and are kept as the record of how the decision was reached; the measured impact on the
+> paper's figures of merit is in
+> [`loq_readout_change_impact.md`](loq_readout_change_impact.md).
+
 Working note for the methods/limitations discussion. Recorded 2026-08-12. Supersedes
 the "dominant cause" framing in [`loq_stability_note.md`](loq_stability_note.md);
 companion to [`fit_weighting_note.md`](fit_weighting_note.md).
@@ -264,7 +271,7 @@ identical replicates and the only difference is spacing:
 
 | readout | resolved | floor-pinned / no-crossing | no LOQ |
 |---|---|---|---|
-| uniform grid (current code) | 15 | 9 floor-pinned | 3 |
+| uniform grid (pre-merge grid-snap) | 15 | 9 floor-pinned | 3 |
 | log grid alone | 24 | - | 3 |
 | log + interpolation + explicit no-crossing | 19 | 5 no-crossing | 3 |
 
@@ -326,7 +333,7 @@ Findings:
 - **log+current is the best all-round recovery where these assays operate** (LOQ
   low-to-mid), because it always reports and log spacing removes the uniform grid's
   floor bias. This is the option the literature does *not* single out.
-- **The current code (uniform+current) is best only when the LOQ is high in the
+- **Uniform+current (the pre-merge grid-snap) is best only when the LOQ is high in the
   range** (0.0166), where the uniform grid resolves finely and it is near-unbiased.
 - **The interpolated readouts recover the LOQ worst here.** They decline so often
   (report rates 0-63%) that coverage collapses, and their reported values are an
