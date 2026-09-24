@@ -42,9 +42,17 @@ for j, (name, nice) in enumerate(DS):
         ax.set_xlabel(f"{fom} (log)"); ax.set_xlim(-3, 0)
         ax.set_xticks(range(-3, 1)); ax.set_xticklabels([f"$10^{{{t}}}$" for t in range(-3, 1)])
         ax.grid(True, alpha=0.3); ax.set_title(nice)
-        if i == 0 and j == 2:
-            ax.legend()
-plt.tight_layout()
+
+# one shared legend above the panels (generic labels — per-panel n varies), so it
+# never overlaps a panel's data or ticks
+from matplotlib.patches import Patch
+legend_handles = [
+    Patch(facecolor=DARK, alpha=0.3, edgecolor=DARK, linewidth=2, label="detection-floored"),
+    Patch(facecolor=LIGHT, alpha=0.3, edgecolor=LIGHT, linewidth=2, label="resolved noise floor"),
+]
+fig.legend(handles=legend_handles, loc="upper center", ncol=2, frameon=False,
+           bbox_to_anchor=(0.5, 1.02))
+plt.tight_layout(rect=(0, 0, 1, 0.95))
 out = repo_path(cfg["output"], "SUPP_lod_loq_tiers.png")
 plt.savefig(out, dpi=1000, bbox_inches="tight")
 print("wrote", out)
