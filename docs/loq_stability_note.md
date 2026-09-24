@@ -4,20 +4,29 @@ Working note for the methods/limitations discussion. Recorded 2026-08-11, revise
 the same day — see [Correction](#correction-to-the-first-version-of-this-note) at
 the end. Companion to [`fit_weighting_note.md`](fit_weighting_note.md).
 
-> **Superseded in part (2026-08-12).** This note names the resampling scheme as the
-> dominant cause of LOQ instability. Later work found that the *readout grid* matters
-> more: the CV is read on a uniform `linspace` while the design is log-spaced, so the
-> crossing often falls inside the interval the grid steps over. Correcting the spacing
-> makes case and Bayesian resampling produce identical outcomes, which means the
-> scheme differences measured here were substantially grid spacing in disguise. Read
-> [`loq_grid_and_resampling_note.md`](loq_grid_and_resampling_note.md) alongside this
-> one; the measurements below stand, the attribution does not.
+> **Correction (2026-09-23).** The 2026-08-12 note directly below said the *readout
+> grid*, not the resampling scheme, was the dominant cause of LOQ instability. A direct
+> experiment has since shown that is wrong. The seed-family spread was re-run with the
+> readout held fixed and only the scheme changed, then with the scheme held fixed and
+> only the readout changed (`resampling_stability.py`, `one_protein`, the merged
+> interpolated-readout tool). The scheme is the driver — mean seed-to-seed spread is 74%
+> for case resampling against 21% for stratified — while the readout barely moves it
+> (grid-snap 47% against interpolated 48%). `GEGFMVVTATGDNTFVGR` still goes from 300–460%
+> under case resampling to 0.0% under stratified. So the measurements *and* the
+> attribution in the body of this note are correct; the 2026-08-12 reattribution to grid
+> spacing was mistaken, and the interpolated readout (merged, matrix-matched_calcurves
+> #21) does not change the picture. The claim in
+> [`loq_grid_and_resampling_note.md`](loq_grid_and_resampling_note.md) that correcting the
+> grid collapses the scheme differences does not hold.
 >
-> **Superseded again (2026-08-12).** This note treats stratified resampling as
-> the fix. A calibration study against a known ground truth has since shown that
-> stratified resampling *understates* uncertainty by about 20%, and that the
-> scheme already in the tool is the best calibrated of four tested. Do not read
-> this note as an argument for changing the resampler.
+> **Keep case resampling anyway (2026-08-12, still current).** A calibration study
+> against a known ground truth showed that stratified resampling *understates* uncertainty
+> by about 20%, and that case resampling — already in the tool — is the best calibrated of
+> four schemes tested. Case resampling's wider seed-to-seed spread is therefore honest
+> uncertainty, not a defect to design away. Part of it is finite-replicate Monte-Carlo
+> scatter that shrinks with a higher `--bootreps` (mean spread 60% at B=100 against 35% at
+> B=400). Do not read the body below as an argument for changing the resampler; read it as
+> a limitation to state.
 
 **Not measured on the paper's datasets.** Every number below comes from
 `data/one_protein.csv`, the tool's 27-peptide sample dataset (yeast, EncyclopeDIA,
