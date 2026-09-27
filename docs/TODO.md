@@ -56,6 +56,12 @@ the same content (see `run_all.py --with-raw`).
       5,885→6,449). Clarify which metric the "increase" refers to.
 - [ ] Confirm the instrument nickname mapping for Fig 2B: **Timbaux = Ultra**,
       **Desnaux = Ultra II** (both filenames say "Ultra" = product family).
+- [ ] **Methods/limitations: search-engine missingness sets the LOD.** DIA-NN reports a
+      row only where a precursor is identified; the tool backfills missing cells with zero,
+      which fabricates a noise plateau for sparse peptides and pins their LOD to a dilution
+      level. EncyclopeDIA integrates the background so its matrix is dense and does not show
+      this. Inflates the Bruker detection counts. Write-up + numbers in
+      [`lod_missingness_note.md`](lod_missingness_note.md); decide gate vs caveat.
 
 ## Figures
 - [ ] **Fig 2: the fourth box-and-whisker panel is written but never rendered
