@@ -50,10 +50,17 @@ the same content (see `run_all.py --with-raw`).
       the trilinear fit requires **≥5 distinct curve points**; the LOQ thresholds the CV
       of bootstrap-resampled *means* rather than raw replicate CV (~1.7x apart at n=3);
       and LOQ is CV-gated while ULOQ is purely geometric.
-- [ ] **Results / Fig 2B:** the manuscript's "≈24% increase, Ultra n=5756 / Ultra II
-      n=7137" is from the ORIGINAL (pre-improvement) code. Update to the new numbers:
-      detection **+36%**, quantifiable **+7–10%** (finite LOD 6,614→7,084; finite LOQ
-      5,885→6,449). Clarify which metric the "increase" refers to.
+- [ ] **Results / Fig 2B:** the draft's placeholder "≈24% increase, Ultra n=5756 /
+      Ultra II n=7137" predates the current code and datasets. Fig 2B is now the gated
+      rerun of Timbaux (Ultra) vs Desnaux (Ultra II) — `data/figuresofmerit/main/
+      bruker_ultra.csv` and `bruker_ultraII.csv`, `--min_detections 3`. Final gated
+      counts (2026-09-29): quantifiable (finite LOQ) **+37%**, Ultra n=27,562 /
+      Ultra II n=37,810; detection (finite LOD) **+39%**, Ultra n=28,781 / Ultra II
+      n=40,057. State which metric the "increase" refers to. Pre-gate the same
+      comparison reads finite LOD 48,754 / 65,021 (+33%); the gate strips ~40% of
+      fabricated detections from each instrument, so the Ultra-II advantage holds (it
+      widens slightly) while the absolute counts drop — see
+      [`lod_missingness_note.md`](lod_missingness_note.md).
 - [ ] Confirm the instrument nickname mapping for Fig 2B: **Timbaux = Ultra**,
       **Desnaux = Ultra II** (both filenames say "Ultra" = product family).
 - [ ] **Methods/limitations: search-engine missingness sets the LOD.** DIA-NN reports a

@@ -72,17 +72,34 @@ missingness plus the zero-fill, not from a readout grid.
 
 The detection gain reported for the Bruker DIA-NN sets is inflated by these zero-filled
 peptides. On the same `bruker_ultra` input, finite LODs rise from 6,614 (no densification)
-to 48,754 (current) — most of the added "detections" are peptides seen at only one or two
-real levels. Any detection-count comparison across the DIA-NN sets should either state this
-caveat or apply a gate.
+to 48,754 (current densify, no gate) — most of the added "detections" are peptides seen at
+only one or two real levels.
 
-Two fixes, both input-aware, neither yet applied:
-1. **Detection gate** — require at least N real (reported, nonzero) levels before returning
-   a finite LOD/LOQ. Removes the one- and two-point peptides and deflates the detection
+The detection gate (fix 1, below) is now implemented (`--min_detections`, default 3;
+matrix-matched_calcurves#25) and the Bruker sets were regenerated with it (2026-09-29). On
+the paper's Ultra (Timbaux) and Ultra II (Desnaux) sets it removes the one- and two-point
+peptides:
+
+| set | finite LOD, no gate | finite LOD, gated | removed |
+|---|---|---|---|
+| Ultra (Timbaux) | 48,754 | 28,781 | 41% |
+| Ultra II (Desnaux) | 65,021 | 40,057 | 38% |
+
+The Fig 2B hardware comparison survives the correction. Quantifiable peptides (finite LOQ)
+are Ultra 27,562 vs Ultra II 37,810 (+37%); finite LOD is +39%. The gate strips a similar
+fraction of fabricated detections from both instruments, so the Ultra II advantage holds and
+widens slightly against the pre-gate +33%. What was fabricated is the absolute count, not the
+comparison.
+
+Two fixes, both input-aware:
+1. **Detection gate (implemented, matrix-matched_calcurves#25).** Require at least N real
+   (reported) levels before returning a finite LOD/LOQ; default 3. Counts distinct reported
+   levels *before* the zero-fill, so it works for both DIA-NN (missing rows) and EncyclopeDIA
+   (dense, never trips). Removes the one- and two-point peptides and deflates the detection
    count to what was actually measured.
-2. **Do not treat unreported DIA-NN cells as measured zeros** for the noise-plateau
-   estimate (the `bin/calculate-loq.py:141` TODO). Keeps the densification where it helps
-   (genuine low-end dropout) without fabricating a plateau from nothing.
+2. **Do not treat unreported DIA-NN cells as measured zeros** for the noise-plateau estimate
+   (the `bin/calculate-loq.py:141` TODO). Not applied. Would keep the densification where it
+   helps (genuine low-end dropout) without fabricating a plateau from nothing.
 
 ## Reproducing
 
