@@ -8,5 +8,4 @@ seaborn>=0.13
 vizta            # Talus Bio matplotlib theme + talusbio palette
 lmfit>=1.3       # only needed for the example-curve figures that refit peptides
 pyteomics>=4.7   # Fig 3: peptide m/z from sequence
-scikit-learn>=1.4  # Fig 3 LOQ-prediction model only
 pyyaml

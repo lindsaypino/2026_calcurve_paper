@@ -4,12 +4,13 @@ Figure-generation code for the JASMS matrix-matched calibration curves paper. Th
 LOD/LOQ/**ULOQ** algorithm itself lives in a separate repository, pinned here as a
 submodule ([`matrix-matched_calcurves`](https://github.com/lindsaypino/matrix-matched_calcurves)).
 
-**Tool version.** The submodule is pinned at **`ffb1087`** ("Restore piecewise's
-legacy LOD edge cases; keep peptides with no multiplier", 2026-08-11). Not every
-figure of merit in `data/figuresofmerit/` has been regenerated against that pin yet —
-[`docs/fom_provenance.md`](docs/fom_provenance.md) records, per CSV, the exact input,
-concentration map, `min_noise_points`, and producing commit, and marks the ones that
-are still stale.
+**Tool version.** The submodule is pinned at **`44e1765`** ("min-detections-gate":
+the `--min_detections` gate that stops fabricated LOD/LOQ on sparse DIA-NN inputs).
+All ten non-legacy figures of merit in `data/figuresofmerit/` have been regenerated
+against the current pin; [`docs/fom_provenance.md`](docs/fom_provenance.md) records,
+per CSV, the exact input, concentration map, `min_noise_points`, and producing commit.
+`legacy_mnp2/` stays frozen at the original pre-fix tool by design (before/after
+supplement).
 
 > **What's left to do:** see [`docs/TODO.md`](docs/TODO.md). All figure scripts run
 > (`python run_all.py --with-raw`); remaining work is mostly manuscript text + the
@@ -28,7 +29,8 @@ src/                     shared code
 figures/                 one script per panel (import src)
 data/
   figuresofmerit/        LOD/LOQ/ULOQ outputs — GITIGNORED (manuscript supplemental
-                         tables); reproduce locally with `build_fom.py`
+                         tables); reproduce locally (see "Regenerating the
+                         figures-of-merit" below)
     main/                mnp=2 (Exploris mnp=2, IL15 mnp=0) — the paper's main panels
     supp_mnp0/           DIA-NN datasets re-run at min_noise_points=0 (supplement)
     legacy_mnp2/         original pre-fix outputs (before/after; NOT reproducible here)

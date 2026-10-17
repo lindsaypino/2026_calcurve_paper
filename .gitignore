@@ -7,7 +7,8 @@ diann_report*.tsv
 *_CURVES_pep.tsv
 
 # figures-of-merit outputs — submitted with the manuscript as SUPPLEMENTAL TABLES,
-# not tracked here. Reproduce locally with `python build_fom.py` (needs raw data).
+# not tracked here. Reproduce locally by running the pinned tool (needs raw data);
+# see "Regenerating the figures-of-merit" in README.md.
 # (data/maps/ IS tracked — the maps are tiny recipe inputs, not FOM outputs.)
 data/figuresofmerit/
 

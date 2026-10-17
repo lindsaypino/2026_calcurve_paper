@@ -85,14 +85,17 @@ the same content (see `run_all.py --with-raw`).
 
 ## Repo
 - [x] Push the figure-port commit.
-- [ ] Add a `LICENSE`. (The pinned tool is Apache-2.0, if we want to match.)
+- [x] Add a `LICENSE`. Apache-2.0 (matches the pinned tool), copyright 2026 Lindsay K. Pino.
 - [ ] Point `config.yaml → raw:` at wherever the MS data lives for anyone reproducing
-      the raw-data figures (`run_all.py --with-raw`). The SIS entries currently point at
-      a local `Downloads` path — move to the Drive root once the data lands there.
-- [ ] `docs/figure_manifest.md` lists a `figures/fig03_loq_model.py` that doesn't exist;
-      the README and `.gitignore` reference a `build_fom.py` that doesn't either. Either
-      port them or drop the references (`scikit-learn` in `requirements.txt` is only
-      there for the missing model script).
+      the raw-data figures (`run_all.py --with-raw`). The SIS entries still point at a
+      local `Downloads` path — move to the Drive root once the data lands there. (Left
+      as-is for now; `config.yaml` is machine-local and edited per machine.)
+- [x] Dead references dropped: `figures/fig03_loq_model.py` (never written) removed from
+      `figure_manifest.md`; `build_fom.py` (never existed) repointed to the
+      "Regenerating the figures-of-merit" instructions in README + `.gitignore`;
+      `scikit-learn` removed from `requirements.txt` (no `sklearn` usage in the code).
+      Also refreshed the README "Tool version" paragraph (pin `44e1765`, all 10 FOMs
+      regenerated).
 
 ## Done
 - [x] **Resampling scheme: keep case resampling.** Stratified, wild and Bayesian were
