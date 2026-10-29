@@ -15,7 +15,7 @@ All LOD/LOQ/ULOQ come from `calculate-loq.py` (`tools/matrix-matched_calcurves`,
 | Bruker 60SPD_pr | Ultra II, 60 SPD | DIA-NN `pr_matrix` (normalized) | 2 | `main/bruker_60spd_pr.csv` |
 | Bruker Ultra | timsTOF Ultra (Timbaux), 60 SPD | separate-search `CURVES_pep` | 2 | `main/bruker_ultra.csv` |
 | Bruker Ultra II | timsTOF Ultra II (Desnaux), 60 SPD | separate-search `CURVES_pep` | 2 | `main/bruker_ultraII.csv` |
-| SIS peptide response | timsTOF Ultra, 17 min, 5-pt 3-fold | Skyline `Peptide Total Area Fragment` | **0** (never reaches noise) | *diagnostic only — no ULOQ; see [`diagnostics.md`](diagnostics.md)* |
+| SIS peptide response | timsTOF Ultra, 17 min, 5-pt 3-fold | Skyline `Peptide Total Area Fragment` | **0** (never reaches noise) | `output/sis_run/fom_mnp0_msp2.csv` (heavy-only); no ULOQ — see [`diagnostics.md`](diagnostics.md) + the good/bad/ugly supplement |
 
 `supp_mnp0/` = same DIA-NN datasets re-run at `min_noise_points=0`; `legacy_mnp2/`
 = the original pre-fix outputs (default mnp=2) for the before/after supplement.
@@ -32,6 +32,7 @@ All LOD/LOQ/ULOQ come from `calculate-loq.py` (`tools/matrix-matched_calcurves`,
 | Fig 3 RT/mz/abund | `figures/fig03_retentiontime.py` | `legacy_mnp2/bruker_ultra.csv` + ultra `diann_report` | yes |
 | Supp before/after | `figures/supp_before_after.py` | `legacy_mnp2/` + `supp_mnp0/` | no |
 | Supp tiers | `figures/supp_tiers.py` | `supp_mnp0/` | no |
+| Supp SIS examples | `figures/supp_sis_examples.py` | `output/sis_run/sis_melted.csv` + `fom_mnp0_msp2.csv`; refits peptides | no |
 | Supp bootstrap calibration | `figures/supp_bootstrap_calibration.py` | simulation only (ground truth known) | no |
 | Supp curve spacing | `figures/supp_curve_spacing.py` | simulation + submodule `data/one_protein.csv` | no |
 | Supp LOQ readout | `figures/supp_loq_readout.py` | simulation only (ground truth known) | no |
