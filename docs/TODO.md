@@ -37,8 +37,8 @@ the same content (see `run_all.py --with-raw`).
       triptychs, the ULOQ example peptides). Untested, and an example peptide resting on
       a thin plateau would be a weak feature. Blocked on populating
       `data/figuresofmerit/`. See [`docs/diagnostics.md`](diagnostics.md).
-- [ ] *(optional)* Regenerate `asms/ultra` with the **new code at mnp=2** so Fig 3's
-      LOQ comes from a current-tool FOM instead of `legacy_mnp2/bruker_ultra.csv`
+- [ ] *(optional)* Regenerate `asms/ultra` with the **new code at mnp=2** so the RT/m/z/abundance
+      supplement's (formerly Fig 3) LOQ comes from a current-tool FOM instead of `legacy_mnp2/bruker_ultra.csv`
       (the original pre-fix output). Cosmetic — values are close.
 
 ## Manuscript text

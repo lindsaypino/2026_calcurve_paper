@@ -28,3 +28,6 @@ __pycache__/
 desktop.ini
 Thumbs.db
 output/*.npz
+
+# local-only planning notes
+*.local.md
