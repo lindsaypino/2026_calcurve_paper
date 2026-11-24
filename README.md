@@ -57,12 +57,12 @@ manuscript supplemental FOM tables, or regenerate from raw data (see below):
 
 ```bash
 python run_all.py             # panels that read only FOM CSVs
-python run_all.py --with-raw  # also the example-curve / Fig 3 figures (need raw MS data)
+python run_all.py --with-raw  # also the example-curve / RT-m/z-abundance figures (need raw MS data)
 ```
 
 Once the FOM CSVs are present, most panels regenerate in seconds — no multi-GB
 DIA-NN reports or multi-hour LOD/LOQ runs. Only the example-curve figures (Fig 1B
-examples, Fig 3, linear ULOQ examples) refit raw data and need `config.yaml → raw:`
+examples, the RT/m/z/abundance supplement, linear ULOQ examples) refit raw data and need `config.yaml → raw:`
 to point at the MS data on your machine.
 
 ## Regenerating the figures-of-merit

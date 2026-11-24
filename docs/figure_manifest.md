@@ -29,9 +29,9 @@ All LOD/LOQ/ULOQ come from `calculate-loq.py` (`tools/matrix-matched_calcurves`,
 | Fig 2A gradient | `figures/fig02_triptychs.py` | `main/bruker_{60,100}spd.csv` | no |
 | Fig 2B hardware | `figures/fig02_triptychs.py` | `main/bruker_ultra{,II}.csv` | no |
 | Fig 2C software | `figures/fig02_triptychs.py` | `main/bruker_60spd{,_pr}.csv` | no |
-| Fig 3 RT/mz/abund | `figures/fig03_retentiontime.py` | `legacy_mnp2/bruker_ultra.csv` + ultra `diann_report` | yes |
 | Supp before/after | `figures/supp_before_after.py` | `legacy_mnp2/` + `supp_mnp0/` | no |
 | Supp tiers | `figures/supp_tiers.py` | `supp_mnp0/` | no |
+| Supp RT/mz/abund (formerly Fig 3) | `figures/supp_rt_mz_abundance.py` | `legacy_mnp2/bruker_ultra.csv` + ultra `diann_report` | yes |
 | Supp SIS examples | `figures/supp_sis_examples.py` | `output/sis_run/sis_melted.csv` + `fom_mnp0_msp2.csv`; refits peptides | no |
 | Supp bootstrap calibration | `figures/supp_bootstrap_calibration.py` | simulation only (ground truth known) | no |
 | Supp curve spacing | `figures/supp_curve_spacing.py` | simulation + submodule `data/one_protein.csv` | no |

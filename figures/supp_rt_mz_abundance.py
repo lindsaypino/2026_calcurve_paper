@@ -1,4 +1,4 @@
-"""Fig 3 - general trends: LOQ vs RT, m/z, and undiluted-A abundance for the Ultra
+"""Supplement (formerly Fig 3) - general trends: LOQ vs RT, m/z, and undiluted-A abundance for the Ultra
 DIA-NN calcurve. Plain seaborn whitegrid / black-scatter style with a Spearman rho
 (deliberately NOT the vizta theme). LOQ from the asms/ultra default-mnp2 FOM (stored
 as legacy_mnp2/bruker_ultra.csv). NEEDS RAW DATA: the ultra diann_report (config raw).
@@ -80,6 +80,6 @@ panel(axes[2], pd.merge(fom_df, avg_signal, on="peptide", how="inner"),
       "avg_precursor_qty_A", "avg abundance, undiluted curve A", logx=True)
 
 plt.tight_layout()
-out = repo_path(cfg["output"], "FIG3_trends.png")
+out = repo_path(cfg["output"], "SUPP_rt_mz_abundance.png")
 plt.savefig(out, dpi=300, bbox_inches="tight")
 print("wrote", out)

@@ -24,7 +24,7 @@ FOM_ONLY = [
 ]
 NEEDS_RAW = [
     "figures/fig01b_examples.py",
-    "figures/fig03_retentiontime.py",
+    "figures/supp_rt_mz_abundance.py",
     "figures/fig_uloq_examples_linear.py",
 ]
 

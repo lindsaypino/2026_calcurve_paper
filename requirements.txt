@@ -7,5 +7,5 @@ matplotlib>=3.6
 seaborn>=0.13
 vizta            # Talus Bio matplotlib theme + talusbio palette
 lmfit>=1.3       # only needed for the example-curve figures that refit peptides
-pyteomics>=4.7   # Fig 3: peptide m/z from sequence
+pyteomics>=4.7   # RT/m/z/abundance supplement: peptide m/z from sequence
 pyyaml
