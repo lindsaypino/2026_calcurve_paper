@@ -59,6 +59,36 @@ on `report.tsv map.csv`.
 DIA-NN dataset**, while `main/bruker_ultra.csv` is the **Timbaux hardware `CURVES_pep`
 dataset**. Same filename stem, two different experiments.
 
+## `notes` codes in the current CSVs (counted 2026-11-25)
+
+Counted on the files in the "Current state" table, for matrix-matched_calcurves#38. The code
+is the text before the first colon; rows are data rows, header excluded. Read twice (pandas
+and the `csv` module) with identical results. No file carries a fit-failure code
+(`no_usable_points`, `fit_underdetermined`, `fit_singular`, `fit_error`). The `legacy_mnp2`
+files have no `notes` column.
+
+| CSV | rows | empty | `loq_no_crossing` | `loq_at_lod` | `below_min_detections` |
+|---|---|---|---|---|---|
+| `main/exploris_dia` | 62,760 | 41,552 | 20,833 | 375 | 0 |
+| `main/il15_prm` | 539 | 61 | 478 | 0 | 0 |
+| `main/bruker_60spd` | 73,465 | 58,936 | 8,249 | 4,984 | 1,296 |
+| `main/bruker_100spd` | 62,269 | 45,180 | 13,121 | 2,605 | 1,363 |
+| `main/bruker_60spd_pr` | 66,688 | 47,025 | 19,104 | 163 | 396 |
+| `main/bruker_ultra` | 54,805 | 33,089 | 1,219 | 289 | 20,208 |
+| `main/bruker_ultraII` | 74,330 | 46,622 | 2,247 | 54 | 25,407 |
+| `supp_mnp0/bruker_60spd` | 73,465 | 58,454 | 9,979 | 3,736 | 1,296 |
+| `supp_mnp0/bruker_100spd` | 62,269 | 44,196 | 14,839 | 1,871 | 1,363 |
+| `supp_mnp0/bruker_ultra` | 42,882 | 37,796 | 4,241 | 330 | 515 |
+
+The `below_min_detections` counts match the 2026-09-29 table below exactly. The row counts
+in the two tables below are each 1 higher than here: each file has one more line than data
+rows (the header), so those counts included it.
+
+A row holds one code. The LOQ-outcome counts here are lower than in the 2026-09-23 table
+(e.g. `main/bruker_ultra` 1,508 against 6,308), and in every file the drop is no larger than
+the `below_min_detections` count. That is consistent with the gate replacing an earlier
+LOQ-outcome code with `below_min_detections`; it was not checked row by row.
+
 ## Regenerated 2026-09-29 for the detection gate
 
 The eight DIA-NN sets above were regenerated against `44e1765` (branch
@@ -103,6 +133,9 @@ in [`loq_readout_change_impact.md`](loq_readout_change_impact.md). Every run exi
 | `supp_mnp0/bruker_60spd` | 73,466 | 14,247 |
 | `supp_mnp0/bruker_100spd` | 62,270 | 17,315 |
 | `supp_mnp0/bruker_ultra` | 42,883 | 4,963 |
+
+These counts predate the 2026-09-29 gate and no longer match the files; current counts are
+in the `notes` section above.
 
 (`exploris_dia` and `il15_prm` are in `loq_readout_change_impact.md`.) The section below is
 historical — it documents the earlier 2026-08-12 densification pin (`ffb1087`), a no-op for
